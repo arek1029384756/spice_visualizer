@@ -1,0 +1,32 @@
+*NPN Common Base RF amplifier
+
+    .INCLUDE models/BFR93A_SPICE.prm
+
+    V1 vpwr 0 5V
+    v2 vss 0 0V
+    v3 gen vss sin(0V 1uV 10MEG)
+
+    R0 vpwr vdd 10
+    C0 vdd  vss 1u
+    C111 vdd vss 10p
+
+    Rgen gen in 50
+
+    Xnpn col bas emi BFR93A
+    C1 in emi 10n
+    R1 emi vss 1k
+
+    R2 vdd bas 130k
+    R3 bas vss 100k
+    C2 bas vss 10n
+
+    R4 vdd col 4.7k
+    *L10 vdd col 1u
+    *C10 vdd col 250p
+
+    C3 col out 10n
+ 
+    Rload out vss 2700
+
+
+    .end

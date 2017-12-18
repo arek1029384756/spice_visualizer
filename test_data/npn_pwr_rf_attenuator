@@ -1,0 +1,46 @@
+*NPN RF frontend amplifier with antenna attenuator
+
+    .INCLUDE models/BFR93A_SPICE.prm
+
+    V1 vpwr 0 5V
+    v2 vss 0 0V
+    v3 gen vss dc 0 sin(0V 1uV 10MEG)
+    *v3 gen vss dc 0 ac 1uV
+
+    R0 vpwr vdd 10
+    C0 vdd vss 100u
+
+    Rgen gen in 50
+
+    Xnpn col bas emi BFR93A
+    R1 vdd A 47k
+    R2 A vss 47k
+    C1 A vss 1u
+
+    *potentiometer R31 + R32 = 50 Ohm, factor = R31 / 50
+    R31 A P3 30
+    R32 P3 P1 20
+
+    C3 in P1 47n
+    R9 bas P3 0
+
+    R4 vdd col 50
+
+    R5 emi vss 18
+    
+    C6 col out 100n
+
+ 
+    Rload out vss 50
+
+    .control
+    *ac dec 1000 1 100MEG
+    *plot db(mag(out))
+    *plot imag(in) xlimit 10k 100MEG
+
+    tran 1n 200.4u 200u
+    plot gen out
+    plot gen in
+    plot in out
+    .endc
+    .end

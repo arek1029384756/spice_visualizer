@@ -1,0 +1,45 @@
+*NPN RF amplifier
+
+    .INCLUDE models/ebipolar.lib
+
+    V1 vpwr 0 12V
+    v2 vss 0 0V
+    v3 gen vss dc 0 sin(0V 1uV 465k)
+
+    R0 vpwr vdd 10
+    C0 vdd vss 100u
+
+    Rgen gen in 330
+
+    Qnpn col bas emi BC548B
+    R1 vdd A 47k
+    R2 A vss 10k
+    C1 A vss 100n
+
+    *Rin = 330R = R3 || Rin_transistor
+    R3 A bas 470
+    C3 M bas 100n
+
+    *cancelling Miller effect
+    C4 in M 100n
+    L22 M vss 17u
+    C22 M vss 4.3n
+
+    L33 vdd X 17u
+    C33 vdd X 6.8n
+    R4 X col 10
+
+    R5 emi vss 10
+    C5 emi vss 1000n
+    
+    C6 X out 100n
+
+ 
+    Rload out vss 2000
+
+    .control
+    tran 10n 1010u 1000u
+    plot gen out
+    plot gen in
+    .endc
+    .end
