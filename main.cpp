@@ -34,6 +34,9 @@ namespace {
                 file_reader::FileReader<parsers::ParserInterface> freader(&parser);
                 freader.readFile(filename);
 
+                auto& circuit = graph::CircuitGraph::getInstance();
+                circuit.print();
+
                 return 0; //m_qtApp->exec();
             } catch(const std::exception& e) {
                 std::cerr << "\033[0;31mException raised:" << std::endl;
