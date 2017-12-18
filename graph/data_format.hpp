@@ -37,6 +37,10 @@ namespace graph {
             Terminal(const std::string& name, const std::string& connection)
                 : m_name(name), m_connection(connection) {}
 
+            const std::string& getName() const {
+                return m_name;
+            }
+
             const std::string& getConnection() const {
                 return m_connection;
             }
@@ -48,17 +52,28 @@ namespace graph {
         std::list<Terminal> m_terminals;
 
         public:
-        Component(const std::string& type, const std::string& name, const std::string& value, const std::list<std::string>& connections)
+        Component(const std::string& type,
+                const std::string& name,
+                const std::string& value,
+                const std::list<std::string>& connections)
             : m_type(type), m_name(name), m_value(value) {
 
-            for(auto conn : connections) {
-                Terminal terminal("tmp", conn);
+            for(auto connName : connections) {
+                Terminal terminal("tmp", connName);
                 m_terminals.emplace_back(terminal);
             }
         }
 
+        const std::string& getType() const {
+            return m_type;
+        }
+
         const std::string& getName() const {
             return m_name;
+        }
+
+        const std::string& getValue() const {
+            return m_value;
         }
 
         void getConnections(std::list<std::string>& connections) const {
@@ -73,6 +88,7 @@ namespace graph {
 
         CircuitGraph() {}
         CircuitGraph(const CircuitGraph&) = delete;
+        CircuitGraph& operator=(const CircuitGraph&) = delete;
 
         std::map<std::string, Component> m_componentMap;
         std::map<std::string, Connection> m_connectionMap;
@@ -88,55 +104,65 @@ namespace graph {
         }
 
         Connection& updateConnection(const std::string& name) {
-            auto conn = m_connectionMap.find(name);
+            auto connIter = m_connectionMap.find(name);
 
-            if(conn == m_connectionMap.end()) {
+            if(connIter == m_connectionMap.end()) {
                 addConnection(name);
-                conn = m_connectionMap.find(name);
+                connIter = m_connectionMap.find(name);
+                if(connIter == m_connectionMap.end()) {
+                    throw std::runtime_error(std::string("Failed to update connection '") +
+                            name + std::string("'!"));
+                }
             }
-            return conn->second;
+            return connIter->second;
         }
 
-        const Connection& getConnection(const std::string& name) const {
-            auto conn = m_connectionMap.find(name);
-            if(conn == m_connectionMap.end()) {
+        const Connection& getConnectionObject(const std::string& name) const {
+            auto connIter = m_connectionMap.find(name);
+            if(connIter == m_connectionMap.end()) {
                 throw std::runtime_error(std::string("Connection '") +
                         name + std::string("' not found!"));
             }
-            return conn->second;
+            return connIter ->second;
         }
 
-        const Component& getComponent(const std::string& name) const {
-            auto comp = m_componentMap.find(name);
-            if(comp == m_componentMap.end()) {
+        const Component& getComponentObject(const std::string& name) const {
+            auto compIter = m_componentMap.find(name);
+            if(compIter == m_componentMap.end()) {
                 throw std::runtime_error(std::string("Component '") +
                         name + std::string("' not found!"));
             }
-            return comp->second;
+            return compIter->second;
         }
 
-        void addComponent(const std::string& type, const std::string& name, const std::string& value, const std::list<std::string>& connections) {
-            auto comp = Component(type, name, value, connections);
-            m_componentMap.emplace(name, comp);
+        void addComponent(const std::string& type,
+                const std::string& name,
+                const std::string& value,
+                const std::list<std::string>& connections) {
+            auto compObj = Component(type, name, value, connections);
+            m_componentMap.emplace(name, compObj);
 
             for(const auto& connName : connections) {
-                auto& conn = updateConnection(connName);
-                conn.attachComponent(name);
+                auto& connObj = updateConnection(connName);
+                connObj.attachComponent(name);
             }
         }
 
         void print() const {
             for(const auto& compPair : m_componentMap) {
-                const auto& compName = compPair.first;
-                const auto& component = compPair.second;
-                std::cout << std::endl << "For component: " << compName << std::endl;
-                std::list<std::string> cons;
-                component.getConnections(cons);
-                for(const auto& connName : cons) {
+                const auto& rootCompName = compPair.first;
+                const auto& rootComp = compPair.second;
+
+                std::cout << std::endl << "For component: " << rootCompName  << std::endl;
+                std::list<std::string> rootCons;
+                rootComp.getConnections(rootCons);
+                for(const auto& connName : rootCons) {
                     std::cout << "   conname: " << connName << std::endl;
-                    const auto& conn = getConnection(connName);
-                    for(const auto& comp : conn.getComponents()) {
-                        std::cout << "      compname: " << comp << std::endl;
+                    const auto& connObj = getConnectionObject(connName);
+                    for(const auto& compName : connObj.getComponents()) {
+                        const auto& compObj = getComponentObject(compName);
+                        std::cout << "      compname: " << compObj.getName()
+                            << "\t(" << compObj.getValue() << ")" << std::endl;
                     }
                 }
             }
