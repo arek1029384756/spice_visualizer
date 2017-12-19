@@ -97,12 +97,6 @@ namespace graph {
             m_connectionMap.emplace(name, Connection(name));
         }
 
-        public:
-        static CircuitGraph& getInstance() {
-            static CircuitGraph instance;
-            return instance;
-        }
-
         Connection& updateConnection(const std::string& name) {
             auto connIter = m_connectionMap.find(name);
 
@@ -117,22 +111,28 @@ namespace graph {
             return connIter->second;
         }
 
-        const Connection& getConnectionObject(const std::string& name) const {
-            auto connIter = m_connectionMap.find(name);
-            if(connIter == m_connectionMap.end()) {
-                throw std::runtime_error(std::string("Connection '") +
+        template<typename T>
+        const T& getObject(const std::map<std::string, T>& table, const std::string& name) const {
+            auto iter = table.find(name);
+            if(iter == table.end()) {
+                throw std::runtime_error(std::string(typeid(T).name()) + std::string(" '") +
                         name + std::string("' not found!"));
             }
-            return connIter ->second;
+            return iter->second;
+        }
+
+        public:
+        static CircuitGraph& getInstance() {
+            static CircuitGraph instance;
+            return instance;
+        }
+
+        const Connection& getConnectionObject(const std::string& name) const {
+            return getObject<Connection>(m_connectionMap, name);
         }
 
         const Component& getComponentObject(const std::string& name) const {
-            auto compIter = m_componentMap.find(name);
-            if(compIter == m_componentMap.end()) {
-                throw std::runtime_error(std::string("Component '") +
-                        name + std::string("' not found!"));
-            }
-            return compIter->second;
+            return getObject<Component>(m_componentMap, name);
         }
 
         void addComponent(const std::string& type,
