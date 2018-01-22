@@ -11,6 +11,7 @@
 namespace parsers {
 
     class ParserNGSPICE : public ParserInterface {
+        bool m_ignore;
 
         void findTokens(std::string str, std::vector<std::string>& tokens, const std::string& regex) const {
             std::regex r(regex.c_str());
@@ -31,17 +32,21 @@ namespace parsers {
             }
         }
 
-        void parseTokens(const std::vector<std::string>& tokens) const {
+        void parseTokens(const std::vector<std::string>& tokens) {
             try {
                 const auto& tkn = tokens.at(0);
                 const auto tknFirst = tkn.at(0);
                 if(tknFirst == '*') {
                     //comment
+                } else if(tkn == ".control") {
+                    m_ignore = true;
+                } else if(tkn == ".endc") {
+                    m_ignore = false;
                 } else if(tknFirst == '.') {
                     //control
                 } else if(tknFirst == 'V' || tknFirst == 'v') {
                     //voltage source
-                } else {
+                } else if(!m_ignore) {
                     auto& circuit = graph::CircuitGraph::getInstance();
 
                     std::list<std::string> connections;
@@ -56,7 +61,8 @@ namespace parsers {
         }
 
         public:
-        ParserNGSPICE() {
+        ParserNGSPICE()
+            : m_ignore(false) {
         }
 
         virtual void parseLine(const std::string& line) override {
