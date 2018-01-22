@@ -35,8 +35,10 @@ namespace {
                 freader.readFile(filename);
 
                 auto& circuit = graph::CircuitGraph::getInstance();
-                circuit.print();
 
+                circuit.createRecomendations();
+
+                circuit.printiRecommendations();
                 return 0; //m_qtApp->exec();
             } catch(const std::exception& e) {
                 std::cerr << "\033[0;31mException raised:" << std::endl;

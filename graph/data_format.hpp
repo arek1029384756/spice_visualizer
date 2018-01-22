@@ -3,8 +3,52 @@
 
 #include <string>
 #include <list>
+#include <set>
 
 namespace graph {
+
+    class Recommendation {
+        std::string m_name;
+
+        Recommendation() = delete;
+
+        public:
+        static const std::list<Recommendation> priority;
+
+        Recommendation(const std::string& name)
+            : m_name(name) {
+        }
+
+        bool operator==(const Recommendation& other) const {
+            return m_name == other.getName();
+        }
+
+        bool operator<(const Recommendation& other) const {
+            if(*this == other) {
+                return false;
+            }
+
+            for(const auto& r : Recommendation::priority) {
+                if(r.getName() == m_name) {
+                    return false;
+                }
+                if(r.getName() == other.getName()) {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        bool operator>(const Recommendation& other) const {
+            return !(*this == other) && !(*this < other);
+        }
+
+        const std::string& getName() const {
+            return m_name;
+        }
+    };
+    const std::list<Recommendation> Recommendation::priority = { Recommendation("UP"), Recommendation("DOWN"), Recommendation("LEFT"), Recommendation("RIGHT") };
+    typedef std::set<Recommendation, std::greater<Recommendation>> RecommPrioritySet;
 
     class Connection {
         std::string m_name;
@@ -49,6 +93,7 @@ namespace graph {
         std::string m_type;
         std::string m_name;
         std::string m_value;
+        Recommendation m_recommendation;
         std::list<Terminal> m_terminals;
 
         public:
@@ -56,7 +101,7 @@ namespace graph {
                 const std::string& name,
                 const std::string& value,
                 const std::list<std::string>& connections)
-            : m_type(type), m_name(name), m_value(value) {
+            : m_type(type), m_name(name), m_value(value), m_recommendation(Recommendation("")) {
 
             for(auto connName : connections) {
                 Terminal terminal("tmp", connName);
@@ -81,6 +126,14 @@ namespace graph {
                 connections.emplace_back(term.getConnection());
             }
         }
+
+        const Recommendation& getRecommendation() const {
+            return m_recommendation;
+        }
+
+        void setRecommendation(const Recommendation& recomm) {
+            m_recommendation = recomm;
+        }
     };
 
 
@@ -92,6 +145,7 @@ namespace graph {
 
         std::map<std::string, Component> m_componentMap;
         std::map<std::string, Connection> m_connectionMap;
+
 
         void addConnection(const std::string& name) {
             m_connectionMap.emplace(name, Connection(name));
@@ -121,6 +175,69 @@ namespace graph {
             return iter->second;
         }
 
+        const Component& getCoreComponent() const {
+            //Temporary implementation
+            std::string coreName = "Qnpn";
+            auto compIter = m_componentMap.find(coreName);
+            if(compIter == m_componentMap.end()) {
+                throw std::runtime_error(std::string("Core component '") + coreName + std::string("' not found!"));
+            } else {
+                return compIter->second;
+            }
+        }
+
+        Recommendation getPriorityRecommendation(const RecommPrioritySet& recommendations) {
+            if(!recommendations.empty()) {
+                auto it = recommendations.begin();
+                std::cout << it->getName() << std::endl;
+                return *it;
+            } else {
+                throw std::runtime_error(std::string("Empty recommendations set passed!"));
+            }
+        }
+
+        Recommendation connectionTraversal(const std::string& connName, const std::string& rootComponent) {
+            if(connName == "vdd") {
+                return Recommendation("UP");
+            } else if(connName == "vss") {
+                return Recommendation("DOWN");
+            } else if(connName == "gen") {
+                return Recommendation("LEFT");
+            } else if(connName == "out") {
+                return Recommendation("RIGHT");
+            }
+
+            auto& connObj = getConnectionObject(connName);
+            auto& components = connObj.getComponents();
+            RecommPrioritySet recommendations;
+            for(const auto& compName : components) {
+                if(compName != rootComponent) {
+                    auto recomm = componentTraversal(compName, connName);
+                    recommendations.emplace(recomm);
+                }
+            }
+
+            return getPriorityRecommendation(recommendations);
+        }
+
+        Recommendation componentTraversal(const std::string& compName, const std::string& rootConnection) {
+            auto& compObj = getComponentObject(compName);
+            std::list<std::string> connections;
+            compObj.getConnections(connections);
+
+            Recommendation recomm("");
+            for(const auto& connName : connections) {
+                if(connName != rootConnection) {
+                    recomm = connectionTraversal(connName, compName);
+                }
+            }
+
+            auto& comp = const_cast<Component&>(compObj);
+            comp.setRecommendation(recomm);
+
+            return recomm;
+        }
+
         public:
         static CircuitGraph& getInstance() {
             static CircuitGraph instance;
@@ -148,12 +265,19 @@ namespace graph {
             }
         }
 
+        void createRecomendations() {
+            auto& coreComp = getCoreComponent();
+            std::cout << coreComp.getType() << "  " << coreComp.getName() << "  " << coreComp.getValue()  << std::endl;
+
+            componentTraversal(coreComp.getName(), "");
+        }
+
         void print() const {
             for(const auto& compPair : m_componentMap) {
                 const auto& rootCompName = compPair.first;
                 const auto& rootComp = compPair.second;
 
-                std::cout << std::endl << "For component: " << rootCompName  << std::endl;
+                std::cout << std::endl << "For component: " << rootCompName << std::endl;
                 std::list<std::string> rootCons;
                 rootComp.getConnections(rootCons);
                 for(const auto& connName : rootCons) {
@@ -167,6 +291,16 @@ namespace graph {
                 }
             }
         }
+
+        void printiRecommendations() const {
+            for(const auto& compPair : m_componentMap) {
+                const auto& rootCompName = compPair.first;
+                const auto& rootComp = compPair.second;
+
+                std::cout << std::endl << "Component: " << rootCompName << "\tR:" << rootComp.getRecommendation().getName() << std::endl;
+            }
+        }
+
 
     };
 
