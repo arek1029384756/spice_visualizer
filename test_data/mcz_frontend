@@ -1,0 +1,22 @@
+*NPN AF amplifier
+
+    .INCLUDE models/ebipolar.lib
+
+    V1 vdd 0 9V
+    v2 vss 0 0V
+    v3 gen vss sin(0V 2uV 5k) 
+
+    Rgen gen in 50
+
+    Qnpn col1 bas1 emi1 BC548B
+    C11 in bas1 1u
+    R11 col1 bas1 470k
+    R13 vdd col1 5.6k 
+    R14 emi1 vss 0
+
+    C22 col1 out 1u
+
+    *Cload out vss 2p
+    Rload out vss 2000
+
+    .end
