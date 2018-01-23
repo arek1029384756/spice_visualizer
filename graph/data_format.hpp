@@ -48,7 +48,12 @@ namespace graph {
             return m_name;
         }
     };
-    const std::list<Recommendation> Recommendation::priority = { Recommendation("UP"), Recommendation("DOWN"), Recommendation("LEFT"), Recommendation("RIGHT") };
+    const std::list<Recommendation> Recommendation::priority = {
+                                                                    Recommendation("LEFT"),
+                                                                    Recommendation("RIGHT"),
+                                                                    Recommendation("UP"),
+                                                                    Recommendation("DOWN")
+                                                                };
 
 
     class Connection {
