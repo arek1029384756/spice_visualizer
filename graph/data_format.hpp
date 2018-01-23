@@ -4,17 +4,18 @@
 #include <string>
 #include <list>
 #include <set>
+#include <initializer_list>
 
 namespace graph {
 
     class Recommendation {
+        static const std::list<Recommendation> priority;
+
         std::string m_name;
 
         Recommendation() = delete;
 
         public:
-        static const std::list<Recommendation> priority;
-
         Recommendation(const std::string& name)
             : m_name(name) {
         }
@@ -48,7 +49,7 @@ namespace graph {
         }
     };
     const std::list<Recommendation> Recommendation::priority = { Recommendation("UP"), Recommendation("DOWN"), Recommendation("LEFT"), Recommendation("RIGHT") };
-    typedef std::set<Recommendation, std::greater<Recommendation>> RecommPrioritySet;
+
 
     class Connection {
         std::string m_name;
@@ -139,13 +140,16 @@ namespace graph {
 
     class CircuitGraph {
 
+        typedef std::set<Recommendation, std::greater<Recommendation>> RecommPrioritySet;
+
         CircuitGraph() {}
         CircuitGraph(const CircuitGraph&) = delete;
         CircuitGraph& operator=(const CircuitGraph&) = delete;
 
+        std::map<std::string, Recommendation> m_circuitTerminals;
+
         std::map<std::string, Component> m_componentMap;
         std::map<std::string, Connection> m_connectionMap;
-
 
         void addConnection(const std::string& name) {
             m_connectionMap.emplace(name, Connection(name));
@@ -169,7 +173,7 @@ namespace graph {
         const T& getObject(const std::map<std::string, T>& table, const std::string& name) const {
             auto iter = table.find(name);
             if(iter == table.end()) {
-                throw std::runtime_error(std::string(typeid(T).name()) + std::string(" '") +
+                throw std::runtime_error(std::string("Object of type '") + typeid(T).name() + std::string("' and name '") +
                         name + std::string("' not found!"));
             }
             return iter->second;
@@ -186,7 +190,7 @@ namespace graph {
             }
         }
 
-        Recommendation getPriorityRecommendation(const RecommPrioritySet& recommendations) {
+        Recommendation getPriorityRecommendation(const RecommPrioritySet& recommendations) const {
             if(!recommendations.empty()) {
                 auto it = recommendations.begin();
                 std::cout << it->getName() << std::endl;
@@ -196,15 +200,19 @@ namespace graph {
             }
         }
 
+        Recommendation getConnectionRecommendation(const std::string& connName) const {
+            auto it = m_circuitTerminals.find(connName);
+            if(it == m_circuitTerminals.end()) {
+                throw std::runtime_error("");
+            }
+            return it->second;
+        }
+
         Recommendation connectionTraversal(const std::string& connName, const std::string& rootComponent) {
-            if(connName == "vdd") {
-                return Recommendation("UP");
-            } else if(connName == "vss") {
-                return Recommendation("DOWN");
-            } else if(connName == "gen") {
-                return Recommendation("LEFT");
-            } else if(connName == "out") {
-                return Recommendation("RIGHT");
+            try {
+                return getConnectionRecommendation(connName);
+            } catch(const std::runtime_error& e) {
+                //No terminal recommendation found, continue...
             }
 
             auto& connObj = getConnectionObject(connName);
@@ -242,6 +250,23 @@ namespace graph {
         static CircuitGraph& getInstance() {
             static CircuitGraph instance;
             return instance;
+        }
+
+        template<typename T = std::string>
+        void setTerminals(const std::initializer_list<T> initL) {
+            static const std::size_t N = 4;
+            auto size = initL.size();
+            if(size != N) {
+                throw std::runtime_error(std::string("Wrong number of terminals (") +
+                        std::to_string(size) + std::string(" != ") + std::to_string(N) + std::string(")!"));
+            } else {
+                auto it = initL.begin();
+                m_circuitTerminals = {  {*std::next(it, 0), Recommendation("UP")},
+                                        {*std::next(it, 1), Recommendation("DOWN")},
+                                        {*std::next(it, 2), Recommendation("LEFT")},
+                                        {*std::next(it, 3), Recommendation("RIGHT")}
+                                    };
+            }
         }
 
         const Connection& getConnectionObject(const std::string& name) const {
@@ -303,7 +328,6 @@ namespace graph {
 
 
     };
-
 
 }
 

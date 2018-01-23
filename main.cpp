@@ -35,6 +35,7 @@ namespace {
                 freader.readFile(filename);
 
                 auto& circuit = graph::CircuitGraph::getInstance();
+                circuit.setTerminals( { "vdd", "vss", "gen", "out" } );
 
                 circuit.createRecomendations();
 
