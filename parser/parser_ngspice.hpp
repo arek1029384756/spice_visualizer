@@ -11,7 +11,43 @@
 namespace parsers {
 
     class ParserNGSPICE : public ParserInterface {
+        enum class IgnoreStatus {
+            None,
+            Line,
+            SectionBegin,
+            SectionEnd
+        };
+
+        static const std::list<std::pair<std::string, std::string>> m_ignoreSections;
+        static const std::list<char> m_ignoreLines;
+
         bool m_ignore;
+
+        IgnoreStatus checkIgnore(std::string token) const {
+            std::transform(token.begin(), token.end(), token.begin(), ::tolower);
+
+            auto itS = std::find_if(m_ignoreSections.begin(), m_ignoreSections.end(), [&](const auto& pair) {
+                    return (pair.first == token || pair.second == token) ? true : false;
+                    });
+
+            if(itS != m_ignoreSections.end()) {
+                if(itS->first == token) {
+                    return IgnoreStatus::SectionBegin;
+                } else if(itS->second == token) {
+                    return IgnoreStatus::SectionEnd;
+                }
+            }
+
+            auto itL = std::find_if(m_ignoreLines.begin(), m_ignoreLines.end(), [&](const auto& c){
+                    return (c == token.at(0)) ? true : false;
+                    });
+
+            if(itL != m_ignoreLines.end()) {
+                return IgnoreStatus::Line;
+            }
+
+            return IgnoreStatus::None;
+        }
 
         void findTokens(std::string str, std::vector<std::string>& tokens, const std::string& regex) const {
             std::regex r(regex.c_str());
@@ -35,18 +71,13 @@ namespace parsers {
         void parseTokens(const std::vector<std::string>& tokens) {
             try {
                 const auto& tkn = tokens.at(0);
-                const auto tknFirst = tkn.at(0);
-                if(tknFirst == '*') {
-                    //comment
-                } else if(tkn == ".control") {
+                auto ignoreStat = checkIgnore(tkn);
+
+                if(ignoreStat == IgnoreStatus::SectionBegin) {
                     m_ignore = true;
-                } else if(tkn == ".endc") {
+                } else if(ignoreStat == IgnoreStatus::SectionEnd) {
                     m_ignore = false;
-                } else if(tknFirst == '.') {
-                    //control
-                } else if(tknFirst == 'V' || tknFirst == 'v') {
-                    //voltage source
-                } else if(!m_ignore) {
+                } else if(!m_ignore && ignoreStat == IgnoreStatus::None) {
                     auto& circuit = graph::CircuitGraph::getInstance();
 
                     std::list<std::string> connections;
@@ -54,7 +85,7 @@ namespace parsers {
                         connections.emplace_back(tokens.at(i));
                     }
 
-                    circuit.addComponent(std::string(1, tknFirst), tkn, tokens.at(tokens.size() - 1), connections);
+                    circuit.addComponent(std::string(1, tkn.at(0)), tkn, tokens.at(tokens.size() - 1), connections);
                 }
             } catch(const std::out_of_range& e) {
             }
@@ -79,6 +110,8 @@ namespace parsers {
         }
 
     };
+    const std::list<std::pair<std::string, std::string>> ParserNGSPICE::m_ignoreSections = { {".control", ".endc"}, {".subckt", ".ends"} };
+    const std::list<char> ParserNGSPICE::m_ignoreLines = { '*', '.', 'v', 'i' };
 }
 
 #endif
