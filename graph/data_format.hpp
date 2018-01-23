@@ -208,7 +208,9 @@ namespace graph {
             return it->second;
         }
 
-        Recommendation connectionTraversal(const std::string& connName, const std::string& rootComponent) {
+        Recommendation connectionTraversal(const std::string& connName,
+                                            const std::set<std::string>& compPath,
+                                            const std::set<std::string>& connPath) {
             try {
                 return getConnectionRecommendation(connName);
             } catch(const std::runtime_error& e) {
@@ -217,10 +219,14 @@ namespace graph {
 
             auto& connObj = getConnectionObject(connName);
             auto& components = connObj.getComponents();
+
+            std::set<std::string> connPathNext = connPath;
+            connPathNext.emplace(connName);
+
             RecommPrioritySet recommendations;
             for(const auto& compName : components) {
-                if(compName != rootComponent) {
-                    auto recomm = componentTraversal(compName, connName);
+                if(compPath.find(compName) == compPath.end()) {
+                    auto recomm = componentTraversal(compName, compPath, connPathNext);
                     recommendations.emplace(recomm);
                 }
             }
@@ -228,15 +234,21 @@ namespace graph {
             return getPriorityRecommendation(recommendations);
         }
 
-        Recommendation componentTraversal(const std::string& compName, const std::string& rootConnection) {
+        Recommendation componentTraversal(const std::string& compName,
+                                            const std::set<std::string>& compPath,
+                                            const std::set<std::string>& connPath) {
+
             auto& compObj = getComponentObject(compName);
             std::list<std::string> connections;
             compObj.getConnections(connections);
 
+            std::set<std::string> compPathNext = compPath;
+            compPathNext.emplace(compName);
+
             Recommendation recomm("");
             for(const auto& connName : connections) {
-                if(connName != rootConnection) {
-                    recomm = connectionTraversal(connName, compName);
+                if(connPath.find(connName) == connPath.end()) {
+                    recomm = connectionTraversal(connName, compPathNext, connPath);
                 }
             }
 
@@ -294,7 +306,7 @@ namespace graph {
             auto& coreComp = getCoreComponent();
             std::cout << coreComp.getType() << "  " << coreComp.getName() << "  " << coreComp.getValue()  << std::endl;
 
-            componentTraversal(coreComp.getName(), "");
+            componentTraversal(coreComp.getName(), {}, {});
         }
 
         void print() const {
