@@ -13,15 +13,20 @@ namespace graph {
 
         std::string m_name;
 
-        Recommendation() = delete;
-
         public:
+        Recommendation()
+            : m_name("") {}
+
         Recommendation(const std::string& name)
             : m_name(name) {
         }
 
         bool operator==(const Recommendation& other) const {
             return m_name == other.getName();
+        }
+
+        bool operator!=(const Recommendation& other) const {
+            return !operator==(other);
         }
 
         bool operator<(const Recommendation& other) const {
@@ -107,7 +112,7 @@ namespace graph {
                 const std::string& name,
                 const std::string& value,
                 const std::list<std::string>& connections)
-            : m_type(type), m_name(name), m_value(value), m_recommendation(Recommendation("")) {
+            : m_type(type), m_name(name), m_value(value), m_recommendation(Recommendation()) {
 
             for(auto connName : connections) {
                 Terminal terminal("tmp", connName);
@@ -201,7 +206,7 @@ namespace graph {
                 std::cout << it->getName() << std::endl;
                 return *it;
             } else {
-                throw std::runtime_error(std::string("Empty recommendations set passed!"));
+                return Recommendation();
             }
         }
 
@@ -250,15 +255,17 @@ namespace graph {
             std::set<std::string> compPathNext = compPath;
             compPathNext.emplace(compName);
 
-            Recommendation recomm("");
+            Recommendation recomm;
             for(const auto& connName : connections) {
                 if(connPath.find(connName) == connPath.end()) {
                     recomm = connectionTraversal(connName, compPathNext, connPath);
                 }
             }
 
-            auto& comp = const_cast<Component&>(compObj);
-            comp.setRecommendation(recomm);
+            if(recomm != Recommendation()) {
+                auto& comp = const_cast<Component&>(compObj);
+                comp.setRecommendation(recomm);
+            }
 
             return recomm;
         }
