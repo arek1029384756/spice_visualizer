@@ -2,9 +2,12 @@
 #include <iostream>
 #include <file_reader.hpp>
 #include <parser_ngspice.hpp>
-
 #include <thread>
 #include <chrono>
+
+//Temporary include, will be accessed via interface
+#include <schematic.h>
+//
 
 namespace {
     class App {
@@ -34,13 +37,15 @@ namespace {
                 file_reader::FileReader<parsers::ParserInterface> freader(&parser);
                 freader.readFile(filename);
 
-                auto& circuit = graph::CircuitGraph::getInstance();
+                auto& circuit = circuit::CircuitGraph::getInstance();
                 circuit.setTerminals( { "vdd", "vss", "gen", "out" } );
 
                 circuit.createRecomendations();
 
                 circuit.printiRecommendations();
-                return 0; //m_qtApp->exec();
+
+                gui_qt::Schematic dialog;
+                return m_qtApp->exec();
             } catch(const std::exception& e) {
                 std::cerr << "\033[0;31mException raised:" << std::endl;
                 std::cerr << e.what() << "\033[0m" << std::endl;

@@ -6,7 +6,7 @@
 #include <set>
 #include <initializer_list>
 
-namespace graph {
+namespace circuit {
 
     class Recommendation {
         static const std::list<Recommendation> priority;

@@ -78,7 +78,7 @@ namespace parsers {
                 } else if(ignoreStat == IgnoreStatus::SectionEnd) {
                     m_ignore = false;
                 } else if(!m_ignore && ignoreStat == IgnoreStatus::None) {
-                    auto& circuit = graph::CircuitGraph::getInstance();
+                    auto& circuit = circuit::CircuitGraph::getInstance();
 
                     std::list<std::string> connections;
                     for(std::size_t i = 1; i < tokens.size() - 1; ++i) {
