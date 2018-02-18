@@ -5,18 +5,20 @@
 
 namespace gui_qt {
 
+    constexpr qreal gridRaster = 10;
+
     class SchComponent : public QGraphicsItem {
 
         qreal m_length;
         qreal m_width;
         qreal m_margin;
 
-        QPen getBodyPen() const {
-            return QPen(Qt::black, 3, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin);
+        static QPen getBodyPen() {
+            return QPen(Qt::black, 4, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin);
         }
 
-        QPen getTerminalPen() const {
-            return QPen(Qt::black, 1, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin);
+        static QPen getTerminalPen() {
+            return QPen(Qt::black, 2, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin);
         }
 
         protected:
@@ -24,6 +26,10 @@ namespace gui_qt {
         virtual void drawTerminals(QPainter* painter) const = 0;
 
         public:
+        static QPen getConnectionPen() {
+            return getTerminalPen();
+        }
+
         SchComponent(qreal length, qreal width, qreal margin)
             : m_length(length), m_width(width), m_margin(margin) {
         }
@@ -36,8 +42,8 @@ namespace gui_qt {
         }
 
         virtual void paint(QPainter *painter,
-                    const QStyleOptionGraphicsItem *option,
-                    QWidget *widget) override {
+                    const QStyleOptionGraphicsItem *,
+                    QWidget *) override {
             painter->setPen(getBodyPen());
             drawBody(painter);
 
@@ -49,9 +55,9 @@ namespace gui_qt {
 
     class Resistor : public SchComponent {
 
-        static constexpr qreal length = 70;
-        static constexpr qreal width = 40;
-        static constexpr qreal margin = 10;
+        static constexpr qreal length = gridRaster * 7;
+        static constexpr qreal width = gridRaster * 4;
+        static constexpr qreal margin = gridRaster;
 
         protected:
         void drawBody(QPainter* painter) const override {
@@ -72,9 +78,9 @@ namespace gui_qt {
 
     class Capacitor : public SchComponent {
 
-        static constexpr qreal length = 40;
-        static constexpr qreal width = 40;
-        static constexpr qreal margin = 10;
+        static constexpr qreal length = gridRaster * 4;
+        static constexpr qreal width = gridRaster * 4;
+        static constexpr qreal margin = gridRaster;
 
         protected:
         void drawBody(QPainter* painter) const override {

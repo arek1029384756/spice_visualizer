@@ -17,18 +17,26 @@ namespace gui_qt {
         m_view->show();
 
 
-        //Test
-        m_view->fitInView(200, 50, 300, 150, Qt::KeepAspectRatio);
+        //Temporary test
+        m_view->fitInView(200, 50, 500, 150, Qt::KeepAspectRatio);
 
-        SchComponent* comp = new Resistor();
-        comp->setX(300);
-        comp->setY(100);
-        m_scene->addItem(comp);
+        SchComponent* res = new Resistor();
+        res->setX(300);
+        res->setY(100);
+        m_scene->addItem(res);
 
-        comp = new Capacitor();
-        comp->setX(400);
-        comp->setY(100);
-        m_scene->addItem(comp);
+        SchComponent* cap = new Capacitor();
+        cap->setX(400);
+        cap->setY(100);
+        m_scene->addItem(cap);
+
+        auto resRect = res->boundingRect();
+        auto capRect = cap->boundingRect();
+        m_scene->addLine(res->x() + resRect.width(),
+                         res->y() + resRect.height() / 2,
+                         cap->x(),
+                         cap->y() + capRect.height() / 2,
+                         SchComponent::getConnectionPen());
         //
 
     }
