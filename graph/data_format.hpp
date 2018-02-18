@@ -54,9 +54,9 @@ namespace graph {
         }
     };
     const std::list<Recommendation> Recommendation::priority = {
+                                                                    Recommendation("UP"),
                                                                     Recommendation("LEFT"),
                                                                     Recommendation("RIGHT"),
-                                                                    Recommendation("UP"),
                                                                     Recommendation("DOWN")
                                                                 };
 
@@ -191,13 +191,14 @@ namespace graph {
 
         const Component& getCoreComponent() const {
             //Temporary implementation
-            std::string coreName = "Qnpn";
-            auto compIter = m_componentMap.find(coreName);
-            if(compIter == m_componentMap.end()) {
-                throw std::runtime_error(std::string("Core component '") + coreName + std::string("' not found!"));
-            } else {
-                return compIter->second;
+            for(const auto& compPair : m_componentMap) {
+                const auto& compType = compPair.second.getType();
+                if(compType == "Q" || compType == "X") {
+                    return compPair.second;
+                }
             }
+
+            throw std::runtime_error("Core component not found!");
         }
 
         Recommendation getPriorityRecommendation(const RecommPrioritySet& recommendations) const {
