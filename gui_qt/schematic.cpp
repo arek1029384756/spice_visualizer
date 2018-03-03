@@ -16,23 +16,41 @@ namespace gui_qt {
 
         m_view->show();
 
+        tmpGuiTest();
+    }
 
+    Schematic::~Schematic() {
+        delete m_view;
+        delete m_scene;
+    }
+
+    void Schematic::tmpGuiTest() {
         //Temporary test
-        m_view->fitInView(200, 50, 700, 150, Qt::KeepAspectRatio);
+        m_view->fitInView(200, 0, 700, 250, Qt::KeepAspectRatio);
+
+        #if 1
+        for(std::size_t i = 0; i <= schWidth; i += gridRaster) {
+            m_scene->addLine(i, 0, i, schHeight, QPen(Qt::lightGray, 0));
+        }
+
+        for(std::size_t i = 0; i <= schHeight; i += gridRaster) {
+            m_scene->addLine(0, i, schWidth, i, QPen(Qt::lightGray, 0));
+        }
+        #endif
 
         SchComponent* res = new Resistor();
-        res->setX(300);
-        res->setY(100);
+        res->setX(30 * gridRaster);
+        res->setY(10 * gridRaster);
         m_scene->addItem(res);
 
         SchComponent* cap = new Capacitor();
-        cap->setX(420);
-        cap->setY(100);
+        cap->setX(42 * gridRaster);
+        cap->setY(10 * gridRaster);
         m_scene->addItem(cap);
 
         SchComponent* tran = new NpnTransistor();
-        tran->setX(500);
-        tran->setY(80);
+        tran->setX(50 * gridRaster);
+        tran->setY(8 * gridRaster);
         m_scene->addItem(tran);
 
         auto resRect = res->boundingRect();
@@ -49,12 +67,6 @@ namespace gui_qt {
                          tran->x(),
                          tran->y() + tranRect.height() / 2,
                          SchComponent::getConnectionPen());
-        //
-
     }
 
-    Schematic::~Schematic() {
-        delete m_view;
-        delete m_scene;
-    }
 }

@@ -23,6 +23,8 @@ namespace gui_qt {
         private:
             QGraphicsScene* m_scene;
             QGraphicsView* m_view;
+
+            void tmpGuiTest();
     };
 
 }
