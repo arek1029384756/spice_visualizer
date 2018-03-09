@@ -4,6 +4,8 @@
 #include <QDialog>
 #include <QGraphicsScene>
 #include <QGraphicsView>
+#include <sch_component.hpp>
+#include <graphics_component.hpp>
 
 namespace gui_qt {
 
@@ -11,19 +13,19 @@ namespace gui_qt {
     {
         Q_OBJECT
 
-        static constexpr qreal schWidth = 1000;
-        static constexpr qreal schHeight = schWidth / 2;
-
         public slots:
 
         public:
             Schematic(QWidget *parent = 0);
             virtual ~Schematic();
+            void keyPressEvent(QKeyEvent* e);
 
         private:
             QGraphicsScene* m_scene;
             QGraphicsView* m_view;
+            SchGrid* m_grid;
 
+            void setThickness(int key) const;
             void tmpGuiTest();
     };
 

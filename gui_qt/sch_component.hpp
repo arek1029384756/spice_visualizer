@@ -2,36 +2,71 @@
 #define SCHCOMPONENT_H
 
 #include <QGraphicsItem>
+#include <sch_params.hpp>
 
 namespace gui_qt {
 
-    constexpr qreal gridRaster = 10;
-
     class SchComponent : public QGraphicsItem {
+
+        using QGraphicsItem::setX;
+        using QGraphicsItem::setY;
+        using QGraphicsItem::setPos;
 
         qreal m_length;
         qreal m_width;
         qreal m_margin;
 
+        static qreal bodyThick;
+        static qreal termThick;
+
         static QPen getBodyPen() {
-            return QPen(Qt::black, gridRaster * 0.4, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin);
+            return QPen(Qt::black, L2P(bodyThick), Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin);
         }
 
         static QPen getTerminalPen() {
-            return QPen(Qt::black, gridRaster * 0.2, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin);
+            return QPen(Qt::black, L2P(termThick), Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin);
         }
 
         protected:
         virtual void drawBody(QPainter* painter) const = 0;
         virtual void drawTerminals(QPainter* painter) const = 0;
 
-        public:
-        static QPen getConnectionPen() {
+        qreal getL() const {
+            return m_length;
+        }
+
+        qreal getW() const {
+            return m_width;
+        }
+
+        qreal getM() const {
+            return m_margin;
+        }
+
+        static QPen getDrawingPen_T1() {
             return getTerminalPen();
         }
 
-        SchComponent(qreal length, qreal width, qreal margin)
-            : m_length(length), m_width(width), m_margin(margin) {
+        public:
+        static void setThickness(qreal thBody, qreal thTerm) {
+            bodyThick = thBody;
+            termThick = thTerm;
+        }
+
+        SchComponent(qreal logX, qreal logY, qreal logLength, qreal logWidth, qreal logMargin)
+            : m_length(L2P(logLength)),
+            m_width(L2P(logWidth)),
+            m_margin(L2P(logMargin)) {
+
+            setPos(L2P(logX), L2P(logY));
+        }
+
+        SchComponent(QPointF logPointA, QPointF logPointB, qreal logMargin)
+            : SchComponent(logPointA.x(),
+                    logPointA.y(),
+                    std::abs((logPointB - logPointA).x()),
+                    std::abs((logPointB - logPointA).y()),
+                    logMargin) {
         }
 
         virtual ~SchComponent() {
@@ -53,86 +88,103 @@ namespace gui_qt {
 
     };
 
-    class Resistor : public SchComponent {
+    class SchConnLine : public SchComponent {
 
-        static constexpr qreal length = gridRaster * 7;
-        static constexpr qreal width = gridRaster * 4;
-        static constexpr qreal margin = gridRaster;
+        public:
+        SchConnLine(QPointF logPointA, QPointF logPointB)
+            : SchComponent(logPointA, logPointB, 0) {
+        }
 
         protected:
-        void drawBody(QPainter* painter) const override {
-            painter->drawRect(margin, margin, length - margin * 2, width - margin * 2);
+        void drawBody(QPainter*) const override {
         }
 
         void drawTerminals(QPainter* painter) const override {
-            painter->drawLine(0, width / 2, margin, width / 2);
-            painter->drawLine(length - margin, width / 2, length, width / 2);
+            painter->drawLine(0, 0, getL(), getW());
+        }
+
+    };
+
+    class Resistor : public SchComponent {
+
+        static constexpr qreal logLength = 7;
+        static constexpr qreal logWidth = 4;
+        static constexpr qreal logMargin = 1;
+
+        protected:
+        void drawBody(QPainter* painter) const override {
+            painter->drawRect(getM(), getM(), getL() - getM() * 2, getW() - getM() * 2);
+        }
+
+        void drawTerminals(QPainter* painter) const override {
+            painter->drawLine(0, getW() / 2, getM(), getW() / 2);
+            painter->drawLine(getL() - getM(), getW() / 2, getL(), getW() / 2);
         }
 
         public:
-        Resistor()
-            : SchComponent(length, width, margin) {
+        Resistor(qreal logX, qreal logY)
+            : SchComponent(logX, logY, logLength, logWidth, logMargin) {
         }
 
     };
 
     class Capacitor : public SchComponent {
 
-        static constexpr qreal length = gridRaster * 4;
-        static constexpr qreal width = gridRaster * 4;
-        static constexpr qreal margin = gridRaster;
+        static constexpr qreal logLength = 4;
+        static constexpr qreal logWidth = 4;
+        static constexpr qreal logMargin = 1;
 
         protected:
         void drawBody(QPainter* painter) const override {
-            painter->drawLine(length / 2 - margin / 2, 0, length / 2 - margin / 2, width);
-            painter->drawLine(length / 2 + margin / 2, 0, length / 2 + margin / 2, width);
+            painter->drawLine(getL() / 2 - getM() / 2, 0, getL() / 2 - getM() / 2, getW());
+            painter->drawLine(getL() / 2 + getM() / 2, 0, getL() / 2 + getM() / 2, getW());
         }
 
         void drawTerminals(QPainter* painter) const override {
-            painter->drawLine(0, width / 2, margin * 3 / 2, width / 2);
-            painter->drawLine(length - margin * 3 / 2, width / 2, length, width / 2);
+            painter->drawLine(0, getW() / 2, getM() * 3 / 2, getW() / 2);
+            painter->drawLine(getL() - getM() * 3 / 2, getW() / 2, getL(), getW() / 2);
         }
 
         public:
-        Capacitor()
-            : SchComponent(length, width, margin) {
+        Capacitor(qreal logX, qreal logY)
+            : SchComponent(logX, logY, logLength, logWidth, logMargin) {
         }
 
     };
 
     class NpnTransistor : public SchComponent {
 
-        static constexpr qreal length = gridRaster * 8;
-        static constexpr qreal width = gridRaster * 8;
-        static constexpr qreal margin = gridRaster;
+        static constexpr qreal logLength = 8;
+        static constexpr qreal logWidth = 8;
+        static constexpr qreal logMargin = 1;
 
         protected:
         void drawBody(QPainter* painter) const override {
-            painter->drawLine(length / 2 - margin, margin * 2.5, length / 2 - margin, width - margin * 2.5);
-            painter->drawEllipse(QPointF(length / 2, width / 2), length / 2 - margin, width / 2 - margin);
+            painter->drawLine(getL() / 2 - getM(), getM() * 2.5, getL() / 2 - getM(), getW() - getM() * 2.5);
+            painter->drawEllipse(QPointF(getL() / 2, getW() / 2), getL() / 2 - getM(), getW() / 2 - getM());
 
-            painter->setPen(getConnectionPen());
-            painter->drawLine(length / 2 - margin, width / 2, length - margin * 3, margin * 2);
-            painter->drawLine(length / 2 - margin, width / 2, length - margin * 3, width - margin * 2);
+            painter->setPen(getDrawingPen_T1());
+            painter->drawLine(getL() / 2 - getM(), getW() / 2, getL() - getM() * 3, getM() * 2);
+            painter->drawLine(getL() / 2 - getM(), getW() / 2, getL() - getM() * 3, getW() - getM() * 2);
 
-            static const QPointF arrowPoints[] = { QPointF(length - margin * 3, width - margin * 2),
-                                                   QPointF(length - margin * 3.75, width - margin * 3.25),
-                                                   QPointF(length - margin * 4.25, width - margin * 2.75),
+            static const QPointF arrowPoints[] = { QPointF(getL() - getM() * 3, getW() - getM() * 2),
+                                                   QPointF(getL() - getM() * 3.75, getW() - getM() * 3.25),
+                                                   QPointF(getL() - getM() * 4.25, getW() - getM() * 2.75),
                                                 };
-            painter->setPen(getConnectionPen());
+            painter->setPen(getDrawingPen_T1());
             painter->setBrush(QBrush(Qt::black, Qt::SolidPattern));
             painter->drawPolygon(arrowPoints, 3);
         }
 
         void drawTerminals(QPainter* painter) const override {
-            painter->drawLine(0, width / 2, length / 2 - margin, width / 2);
-            painter->drawLine(length - margin * 3, width, length - margin * 3, width - margin * 2);
-            painter->drawLine(length - margin * 3, 0, length - margin * 3, margin * 2);
+            painter->drawLine(0, getW() / 2, getL() / 2 - getM(), getW() / 2);
+            painter->drawLine(getL() - getM() * 3, getW(), getL() - getM() * 3, getW() - getM() * 2);
+            painter->drawLine(getL() - getM() * 3, 0, getL() - getM() * 3, getM() * 2);
         }
 
         public:
-        NpnTransistor()
-            : SchComponent(length, width, margin) {
+        NpnTransistor(qreal logX, qreal logY)
+            : SchComponent(logX, logY, logLength, logWidth, logMargin) {
         }
 
     };

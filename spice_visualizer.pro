@@ -25,7 +25,9 @@ LIBS += -L/usr/lib/$$LOCAL_QT5_LIB -lQt5Widgets
 
 # Input
 HEADERS += gui_qt/schematic.h \
+gui_qt/sch_params.hpp \
 gui_qt/sch_component.hpp \
+gui_qt/graphics_component.hpp \
 circuit/data_format.hpp \
 file_io/file_reader.hpp \
 parser/parser_ngspice.hpp \
