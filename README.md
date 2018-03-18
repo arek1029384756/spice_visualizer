@@ -6,6 +6,8 @@ Compilation and running:
 
 Qt 5.5.x (or above) dev package has to be installed
 
-$ qmake
-$ make
-$ ./spice_visualizer <ngspice netlist>
+```bash
+qmake
+make
+./spice_visualizer <ngspice netlist>
+```
