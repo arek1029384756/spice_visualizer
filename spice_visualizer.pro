@@ -2,26 +2,16 @@
 # spice_visualizer.pro
 ######################################################################
 
-TEMPLATE = app
-TARGET = spice_visualizer
+QT += widgets
+
+QMAKE_PROJECT_NAME = spice_visualizer
 
 #LOGMODE = -D_SILENT
 LOGMODE = -D_VERBOSE
 
-LOCAL_QT5_PFX = x86_64-linux-gnu
-
-# Qt 5.5.x
-LOCAL_QT5_INC = $$LOCAL_QT5_PFX
-
-# Qt 5.2.x
-# LOCAL_QT5_INC =
-
-LOCAL_QT5_LIB = $$LOCAL_QT5_PFX
 INCLUDEPATH += .
 INCLUDEPATH += ./file_io ./parser ./circuit ./gui_qt
-INCLUDEPATH += /usr/include/$$LOCAL_QT5_INC/qt5/QtWidgets
-QMAKE_CXXFLAGS += -Wall -Wextra -pedantic -std=c++14 $$LOGMODE
-LIBS += -L/usr/lib/$$LOCAL_QT5_LIB -lQt5Widgets
+QMAKE_CXXFLAGS += -Wextra -pedantic -std=c++14 $$LOGMODE
 
 # Input
 HEADERS += gui_qt/schematic.h \
