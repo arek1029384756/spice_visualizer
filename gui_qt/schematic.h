@@ -6,6 +6,7 @@
 #include <QGraphicsView>
 #include <sch_component.hpp>
 #include <graphics_component.hpp>
+#include <gui_schematic_interface.hpp>
 
 namespace gui_qt {
 
@@ -16,7 +17,7 @@ namespace gui_qt {
         public slots:
 
         public:
-            Schematic(QWidget *parent = 0);
+            Schematic(gui::GuiSchematicInterfaceInt* ifc, QWidget *parent = 0);
             virtual ~Schematic();
             void keyPressEvent(QKeyEvent* e);
 
@@ -24,6 +25,7 @@ namespace gui_qt {
             QGraphicsScene* m_scene;
             QGraphicsView* m_view;
             SchGrid* m_grid;
+            gui::GuiSchematicInterfaceInt* m_ifc;
 
             void setThickness(int key) const;
             void tmpGuiTest();

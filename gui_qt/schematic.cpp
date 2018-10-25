@@ -7,8 +7,8 @@ namespace gui_qt {
     qreal SchComponent::bodyThick = 0.0;
     qreal SchComponent::termThick = 0.0;
 
-    Schematic::Schematic(QWidget *parent)
-        : QDialog(parent) {
+    Schematic::Schematic(gui::GuiSchematicInterfaceInt* ifc, QWidget *parent)
+        : QDialog(parent), m_ifc(ifc) {
 
         m_scene = new QGraphicsScene();
         m_view = new QGraphicsView(m_scene);

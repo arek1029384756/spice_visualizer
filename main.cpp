@@ -2,18 +2,14 @@
 #include <iostream>
 #include <file_reader.hpp>
 #include <parser_ngspice.hpp>
-#include <thread>
-#include <chrono>
-
-//Temporary include, will be accessed via interface
-#include <schematic.h>
-//
+#include <gui_schematic_qt.hpp>
 
 namespace {
     class App {
         int m_argc;
         char** m_argv;
         QApplication* m_qtApp;
+        std::unique_ptr<gui::GuiSchematicQt> m_schematic;
 
         public:
         App(int argc, char** argv, QApplication* const qtApp)
@@ -41,10 +37,13 @@ namespace {
                 circuit.setTerminals( { "vdd", "vss", "gen", "out" } );
 
                 circuit.createRecomendations();
-
                 circuit.printiRecommendations();
 
-                gui_qt::Schematic dialog;
+                m_schematic.reset(new gui::GuiSchematicQt());
+
+                //gui::GuiSchematicInterfaceExt* pSchematicExt = m_schematic.get();
+                //gui::GuiSchematicInterfaceExtSync* pSchematicExtSync = m_schematic.get();
+
                 return m_qtApp->exec();
             } catch(const std::exception& e) {
                 std::cerr << "\033[0;31mException raised:" << std::endl;
