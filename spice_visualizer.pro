@@ -18,12 +18,16 @@ HEADERS += gui_qt/schematic.h \
 gui_qt/sch_params.hpp \
 gui_qt/sch_component.hpp \
 gui_qt/graphics_component.hpp \
+gui_qt/progress.h \
 gui/gui_schematic_interface.hpp \
 gui/gui_schematic_qt.hpp \
+gui/gui_progress_interface.hpp \
+gui/gui_progress_qt.hpp \
 circuit/data_format.hpp \
 file_io/file_reader.hpp \
 parser/parser_ngspice.hpp \
 parser/parser_interface.hpp
 
 SOURCES += main.cpp \
-gui_qt/schematic.cpp
+gui_qt/schematic.cpp \
+gui_qt/progress.cpp
