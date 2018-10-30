@@ -4,34 +4,33 @@
 #include <parser_ngspice.hpp>
 #include <gui_schematic_qt.hpp>
 #include <gui_progress_qt.hpp>
-
-//temporary for test
-#include <thread>
-#include <chrono>
-//
+#include <base_thread.hpp>
 
 namespace {
 
-    //Temporary test function
-    void tmpProgressTest(gui::GuiProgressInterfaceExtSync* const ifc) {
-        ifc->show();
+    class TmpProgressTest : public task::BaseThread<gui::GuiProgressInterfaceExtSync* const> {
 
-        ifc->updateLabel("Max = 100 ...");
-        ifc->updateMax(100);
-        for(int i = 0; i <= 100; ++i) {
-            ifc->updateProgress(i);
-            std::this_thread::sleep_for(std::chrono::milliseconds(20));
+        void run(gui::GuiProgressInterfaceExtSync* const ifc) override {
+            ifc->show();
+
+            ifc->updateLabel("Max = 100 ...");
+            ifc->updateMax(100);
+            for(std::int32_t i = 0; i <= 100; ++i) {
+                ifc->updateProgress(i);
+                msSleep(20);
+            }
+
+            ifc->updateLabel("Max = 55 ...");
+            ifc->updateMax(55);
+            for(std::int32_t i = 0; i <= 55; ++i) {
+                ifc->updateProgress(i);
+                msSleep(20);
+            }
+
+            ifc->hide();
         }
 
-        ifc->updateLabel("Max = 55 ...");
-        ifc->updateMax(55);
-        for(int i = 0; i <= 55; ++i) {
-            ifc->updateProgress(i);
-            std::this_thread::sleep_for(std::chrono::milliseconds(20));
-        }
-
-        ifc->hide();
-    }
+    };
 
     class App {
         int m_argc;
@@ -39,16 +38,12 @@ namespace {
         QApplication* m_qtApp;
         std::unique_ptr<gui::GuiSchematicQt> m_schematic;
         std::unique_ptr<gui::GuiProgressQt> m_progress;
-        std::thread m_th;
 
         public:
         App(int argc, char** argv, QApplication* const qtApp)
             : m_argc(argc), m_argv(argv), m_qtApp(qtApp) {}
 
         virtual ~App() {
-            if(m_th.joinable()) {
-                m_th.join();
-            }
         }
 
         static const std::string& getVersion() {
@@ -77,7 +72,12 @@ namespace {
                 //gui::GuiSchematicInterfaceExtSync* pSchematicExtSync = m_schematic.get();
 
                 m_progress.reset(new gui::GuiProgressQt());
-                m_th = std::thread(tmpProgressTest, m_progress.get());
+
+                //temporary progress test
+                TmpProgressTest progressTest;
+                task::BaseThread<gui::GuiProgressInterfaceExtSync* const> * const pTask = &progressTest;
+                pTask->start(m_progress.get());
+                //
 
                 return m_qtApp->exec();
             } catch(const std::exception& e) {
