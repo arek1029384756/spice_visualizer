@@ -6,7 +6,7 @@
 #include <algorithm>
 #include <regex>
 #include <parser_interface.hpp>
-#include <data_format.hpp>
+#include <circuit.hpp>
 
 namespace parsers {
 

@@ -1,5 +1,5 @@
-#ifndef DATA_FORMAT
-#define DATA_FORMAT
+#ifndef CIRCUIT
+#define CIRCUIT
 
 #include <string>
 #include <list>

@@ -23,7 +23,7 @@ gui/gui_schematic_interface.hpp \
 gui/gui_schematic_qt.hpp \
 gui/gui_progress_interface.hpp \
 gui/gui_progress_qt.hpp \
-circuit/data_format.hpp \
+circuit/circuit.hpp \
 task/base_thread.hpp \
 file_io/file_reader.hpp \
 parser/parser_ngspice.hpp \
