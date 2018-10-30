@@ -10,7 +10,7 @@ QMAKE_PROJECT_NAME = spice_visualizer
 LOGMODE = -D_VERBOSE
 
 INCLUDEPATH += .
-INCLUDEPATH += ./file_io ./parser ./circuit ./gui ./gui_qt
+INCLUDEPATH += ./file_io ./parser ./circuit ./task ./gui ./gui_qt
 QMAKE_CXXFLAGS += -Wextra -pedantic -std=c++14 $$LOGMODE
 
 # Input
@@ -24,6 +24,7 @@ gui/gui_schematic_qt.hpp \
 gui/gui_progress_interface.hpp \
 gui/gui_progress_qt.hpp \
 circuit/data_format.hpp \
+task/base_thread.hpp \
 file_io/file_reader.hpp \
 parser/parser_ngspice.hpp \
 parser/parser_interface.hpp
