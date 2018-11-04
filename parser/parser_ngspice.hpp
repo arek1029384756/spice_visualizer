@@ -22,6 +22,7 @@ namespace parsers {
         static const std::list<char> m_ignoreLines;
 
         bool m_ignore;
+        circuit::CircuitGraph& m_circuit;
 
         IgnoreStatus checkIgnore(std::string token) const {
             std::transform(token.begin(), token.end(), token.begin(), ::tolower);
@@ -78,22 +79,20 @@ namespace parsers {
                 } else if(ignoreStat == IgnoreStatus::SectionEnd) {
                     m_ignore = false;
                 } else if(!m_ignore && ignoreStat == IgnoreStatus::None) {
-                    auto& circuit = circuit::CircuitGraph::getInstance();
-
                     std::list<std::string> connections;
                     for(std::size_t i = 1; i < tokens.size() - 1; ++i) {
                         connections.emplace_back(tokens.at(i));
                     }
 
-                    circuit.addComponent(std::string(1, tkn.at(0)), tkn, tokens.at(tokens.size() - 1), connections);
+                    m_circuit.addComponent(std::string(1, tkn.at(0)), tkn, tokens.at(tokens.size() - 1), connections);
                 }
             } catch(const std::out_of_range& e) {
             }
         }
 
         public:
-        ParserNGSPICE()
-            : m_ignore(false) {
+        ParserNGSPICE(circuit::CircuitGraph& circuit)
+            : m_ignore(false), m_circuit(circuit) {
         }
 
         virtual void parseLine(const std::string& line) override {

@@ -24,6 +24,7 @@ gui/gui_schematic_qt.hpp \
 gui/gui_progress_interface.hpp \
 gui/gui_progress_qt.hpp \
 circuit/circuit.hpp \
+circuit/processor.hpp \
 task/base_thread.hpp \
 file_io/file_reader.hpp \
 parser/parser_ngspice.hpp \

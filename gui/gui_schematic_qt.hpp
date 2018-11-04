@@ -2,6 +2,8 @@
 #define GUI_SCHEMATIC_QT
 
 #include <iostream>
+#include <memory>
+#include <mutex>
 #include <schematic.h>
 #include <gui_schematic_interface.hpp>
 

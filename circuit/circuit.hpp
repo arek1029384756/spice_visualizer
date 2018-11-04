@@ -152,7 +152,6 @@ namespace circuit {
 
         typedef std::set<Recommendation, std::greater<Recommendation>> RecommPrioritySet;
 
-        CircuitGraph() {}
         CircuitGraph(const CircuitGraph&) = delete;
         CircuitGraph& operator=(const CircuitGraph&) = delete;
 
@@ -272,9 +271,7 @@ namespace circuit {
         }
 
         public:
-        static CircuitGraph& getInstance() {
-            static CircuitGraph instance;
-            return instance;
+        CircuitGraph() {
         }
 
         template<typename T = std::string>
