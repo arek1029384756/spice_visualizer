@@ -10,16 +10,24 @@
 
 namespace circuit {
 
-    class Processor : public task::BaseThread<const std::string, gui::GuiProgressInterfaceExtSync* const> {
+    class Processor : public task::BaseThread<const std::string,
+                                              gui::GuiSchematicInterfaceExtSync* const,
+                                              gui::GuiProgressInterfaceExtSync* const> {
 
-        void run(const std::string filename, gui::GuiProgressInterfaceExtSync* const ifc) override {
+        typedef circuit::CircuitGraph<gui::GuiSchematicInterfaceExtSync,
+                                      gui::GuiProgressInterfaceExtSync> TCircuitGraph;
+
+        void run(const std::string filename,
+                 gui::GuiSchematicInterfaceExtSync* const schIfc,
+                 gui::GuiProgressInterfaceExtSync* const progressIfc) override {
+
             try {
-                circuit::CircuitGraph circuit;
+                TCircuitGraph circuit(schIfc, progressIfc);
 
-                ifc->show();
+                progressIfc->show();
 
-                parsers::ParserNGSPICE parser(circuit);
-                file_reader::FileReader<parsers::ParserInterface, gui::GuiProgressInterfaceExtSync> freader(&parser, ifc);
+                parsers::ParserNGSPICE<TCircuitGraph> parser(circuit);
+                file_reader::FileReader<parsers::ParserInterface, gui::GuiProgressInterfaceExtSync> freader(&parser, progressIfc);
                 freader.readFile(filename);
 
                 circuit.setTerminals( { "vdd", "vss", "gen", "out" } );
@@ -28,17 +36,16 @@ namespace circuit {
                 circuit.printiRecommendations();
 
 
-
-
-
-                ifc->updateLabel("Max = 55 ...");
-                ifc->updateMax(55);
+                //temporary progress bar test
+                progressIfc->updateLabel("Max = 55 ...");
+                progressIfc->updateMax(55);
                 for(std::int32_t i = 0; i <= 55; ++i) {
-                    ifc->updateProgress(i);
+                    progressIfc->updateProgress(i);
                     msSleep(20);
                 }
+                //
 
-                ifc->hide();
+                progressIfc->hide();
             } catch(const std::exception& e) {
                 std::cerr << "\033[0;31mException raised:" << std::endl;
                 std::cerr << e.what() << "\033[0m" << std::endl;

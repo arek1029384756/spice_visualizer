@@ -10,6 +10,7 @@
 
 namespace parsers {
 
+    template<typename TCircuit>
     class ParserNGSPICE : public ParserInterface {
         enum class IgnoreStatus {
             None,
@@ -22,7 +23,7 @@ namespace parsers {
         static const std::list<char> m_ignoreLines;
 
         bool m_ignore;
-        circuit::CircuitGraph& m_circuit;
+        TCircuit& m_circuit;
 
         IgnoreStatus checkIgnore(std::string token) const {
             std::transform(token.begin(), token.end(), token.begin(), ::tolower);
@@ -91,7 +92,7 @@ namespace parsers {
         }
 
         public:
-        ParserNGSPICE(circuit::CircuitGraph& circuit)
+        ParserNGSPICE(TCircuit& circuit)
             : m_ignore(false), m_circuit(circuit) {
         }
 
@@ -109,8 +110,13 @@ namespace parsers {
         }
 
     };
-    const std::list<std::pair<std::string, std::string>> ParserNGSPICE::m_ignoreSections = { {".control", ".endc"}, {".subckt", ".ends"} };
-    const std::list<char> ParserNGSPICE::m_ignoreLines = { '*', '.', 'v', 'i' };
+
+    template<typename TCircuit>
+    const std::list<std::pair<std::string, std::string>> ParserNGSPICE<TCircuit>::m_ignoreSections = { {".control", ".endc"},
+                                                                                                       {".subckt", ".ends"} };
+
+    template<typename TCircuit>
+    const std::list<char> ParserNGSPICE<TCircuit>::m_ignoreLines = { '*', '.', 'v', 'i' };
 }
 
 #endif

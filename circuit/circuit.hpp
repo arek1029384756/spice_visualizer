@@ -148,6 +148,7 @@ namespace circuit {
     };
 
 
+    template<typename TSchematicInterface, typename TProgressInterface>
     class CircuitGraph {
 
         typedef std::set<Recommendation, std::greater<Recommendation>> RecommPrioritySet;
@@ -159,6 +160,9 @@ namespace circuit {
 
         std::map<std::string, Component> m_componentMap;
         std::map<std::string, Connection> m_connectionMap;
+
+        TSchematicInterface* m_schIfc;
+        TProgressInterface* m_progressIfc;
 
         void addConnection(const std::string& name) {
             m_connectionMap.emplace(name, Connection(name));
@@ -271,7 +275,8 @@ namespace circuit {
         }
 
         public:
-        CircuitGraph() {
+        CircuitGraph(TSchematicInterface * const schIfc, TProgressInterface * const progressIfc)
+            : m_schIfc(schIfc), m_progressIfc(progressIfc) {
         }
 
         template<typename T = std::string>

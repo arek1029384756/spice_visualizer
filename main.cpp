@@ -38,8 +38,10 @@ namespace {
                 m_progress.reset(new gui::GuiProgressQt());
 
                 circuit::Processor processor;
-                task::BaseThread<const std::string, gui::GuiProgressInterfaceExtSync* const> * const procThread = &processor;
-                procThread->start(filename, m_progress.get());
+                task::BaseThread<const std::string,
+                                 gui::GuiSchematicInterfaceExtSync* const,
+                                 gui::GuiProgressInterfaceExtSync* const> * const procThread = &processor;
+                procThread->start(filename, m_schematic.get(), m_progress.get());
 
                 return m_qtApp->exec();
             } catch(const std::exception& e) {
