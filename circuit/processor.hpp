@@ -33,7 +33,8 @@ namespace circuit {
                 circuit.setTerminals( { "vdd", "vss", "gen", "out" } );
 
                 circuit.createRecomendations();
-                circuit.printiRecommendations();
+                circuit.print();
+                circuit.printRecommendations();
 
 
                 //temporary progress bar test

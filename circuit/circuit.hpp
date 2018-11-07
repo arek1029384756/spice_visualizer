@@ -12,13 +12,14 @@ namespace circuit {
         static const std::list<Recommendation> priority;
 
         std::string m_name;
+        std::string m_referenceTerminal;
 
         public:
         Recommendation()
-            : m_name("") {}
+            : m_name(""), m_referenceTerminal("") {}
 
         Recommendation(const std::string& name)
-            : m_name(name) {
+            : m_name(name), m_referenceTerminal("") {
         }
 
         bool operator==(const Recommendation& other) const {
@@ -51,6 +52,14 @@ namespace circuit {
 
         const std::string& getName() const {
             return m_name;
+        }
+
+        void setReferenceTerminal(const std::string& termName) {
+            m_referenceTerminal = termName;
+        }
+
+        const std::string& getReferenceTerminal() const {
+            return m_referenceTerminal;
         }
     };
     const std::list<Recommendation> Recommendation::priority = {
@@ -114,8 +123,9 @@ namespace circuit {
                 const std::list<std::string>& connections)
             : m_type(type), m_name(name), m_value(value), m_recommendation(Recommendation()) {
 
+            std::size_t i = 0;
             for(auto connName : connections) {
-                Terminal terminal("tmp", connName);
+                Terminal terminal(std::to_string(++i), connName);
                 m_terminals.emplace_back(terminal);
             }
         }
@@ -136,6 +146,10 @@ namespace circuit {
             for(const auto& term : m_terminals) {
                 connections.emplace_back(term.getConnection());
             }
+        }
+
+        const std::list<Terminal>& getTerminals() const {
+            return m_terminals;
         }
 
         const Recommendation& getRecommendation() const {
@@ -253,16 +267,17 @@ namespace circuit {
                                             const std::set<std::string>& connPath) {
 
             auto& compObj = getComponentObject(compName);
-            std::list<std::string> connections;
-            compObj.getConnections(connections);
+            const auto& terminals = compObj.getTerminals();
 
             std::set<std::string> compPathNext = compPath;
             compPathNext.emplace(compName);
 
             Recommendation recomm;
-            for(const auto& connName : connections) {
+            for(const auto& term : terminals) {
+                const auto& connName = term.getConnection();
                 if(connPath.find(connName) == connPath.end()) {
                     recomm = connectionTraversal(connName, compPathNext, connPath);
+                    recomm.setReferenceTerminal(term.getName());
                 }
             }
 
@@ -330,11 +345,10 @@ namespace circuit {
                 const auto& rootComp = compPair.second;
 
                 std::cout << std::endl << "For component: " << rootCompName << std::endl;
-                std::list<std::string> rootCons;
-                rootComp.getConnections(rootCons);
-                for(const auto& connName : rootCons) {
-                    std::cout << "   conname: " << connName << std::endl;
-                    const auto& connObj = getConnectionObject(connName);
+                const auto& terminals = rootComp.getTerminals();
+                for(const auto& term : terminals) {
+                    std::cout << "    term: " << term.getName() << " conname: " << term.getConnection() << std::endl;
+                    const auto& connObj = getConnectionObject(term.getConnection());
                     for(const auto& compName : connObj.getComponents()) {
                         const auto& compObj = getComponentObject(compName);
                         std::cout << "      compname: " << compObj.getName()
@@ -344,12 +358,20 @@ namespace circuit {
             }
         }
 
-        void printiRecommendations() const {
+        void printRecommendations() const {
             for(const auto& compPair : m_componentMap) {
                 const auto& rootCompName = compPair.first;
                 const auto& rootComp = compPair.second;
+                const auto& recomm = rootComp.getRecommendation();
 
-                std::cout << std::endl << "Component: " << rootCompName << "\tR:" << rootComp.getRecommendation().getName() << std::endl;
+                std::cout << std::endl
+                          << "Component: "
+                          << rootCompName
+                          << "\tR:"
+                          << recomm.getName()
+                          << "\tRefT:"
+                          << recomm.getReferenceTerminal()
+                          << std::endl;
             }
         }
 
