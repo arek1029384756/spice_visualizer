@@ -38,9 +38,7 @@ namespace {
                 m_progress.reset(new gui::GuiProgressQt());
 
                 circuit::Processor processor;
-                task::BaseThread<const std::string,
-                                 gui::GuiSchematicInterfaceExtSync* const,
-                                 gui::GuiProgressInterfaceExtSync* const> * const procThread = &processor;
+                auto* const procThread = processor.getThreadManagerInterface();
                 procThread->start(filename, m_schematic.get(), m_progress.get());
 
                 return m_qtApp->exec();

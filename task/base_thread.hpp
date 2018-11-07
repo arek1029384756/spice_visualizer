@@ -8,7 +8,21 @@
 namespace task {
 
     template<class... TArgs>
-    class BaseThread {
+    class ThreadManagerInterface {
+        public:
+        virtual void start(TArgs... args) = 0;
+        virtual void stop() = 0;
+    };
+
+    class ThreadUserInterface {
+        public:
+        virtual bool isRunning() const = 0;
+        virtual void msSleep(std::intmax_t ms) const = 0;
+    };
+
+    template<class... TArgs>
+    class BaseThread : public ThreadManagerInterface<TArgs...>,
+                              ThreadUserInterface {
         std::atomic<bool> m_run;
         std::thread m_th;
 
@@ -21,24 +35,24 @@ namespace task {
         protected:
         virtual void run(TArgs... args) = 0;
 
-        auto isRunning() const {
-            return m_run.load();
-        }
-
-        void msSleep(std::intmax_t ms) const {
-            std::this_thread::sleep_for(std::chrono::milliseconds(ms));
-        }
-
         public:
         BaseThread() {
             m_run.store(false);
         }
 
-        ~BaseThread() {
+        virtual ~BaseThread() {
             stop();
         }
 
-        void start(TArgs... args) {
+        ThreadManagerInterface<TArgs...> * getThreadManagerInterface() {
+            return this;
+        }
+
+        ThreadUserInterface * getThreadUserInterface() {
+            return this;
+        }
+
+        void start(TArgs... args) override {
             if(!m_th.joinable()) {
                 m_run.store(true);
                 m_th = std::thread([&](TArgs... args){ run(args...); }, args...);
@@ -47,9 +61,17 @@ namespace task {
             }
         }
 
-        void stop() {
+        void stop() override {
             m_run.store(false);
             join();
+        }
+
+        bool isRunning() const override {
+            return m_run.load();
+        }
+
+        void msSleep(std::intmax_t ms) const override {
+            std::this_thread::sleep_for(std::chrono::milliseconds(ms));
         }
 
     };
