@@ -2,6 +2,8 @@
 #define SCHCOMPONENT_H
 
 #include <QGraphicsItem>
+#include <tuple>
+#include <map>
 #include <sch_params.hpp>
 
 namespace gui_qt {
@@ -16,8 +18,21 @@ namespace gui_qt {
         qreal m_width;
         qreal m_margin;
 
+        std::map<std::string, QPointF> m_logTerminals;
+
         static qreal bodyThick;
         static qreal termThick;
+
+        inline static const std::map<std::tuple<int, int, std::string>, qreal> rotationMap = {
+            { { 1,  0, "RIGHT"  },   0 },
+            { { 1,  0, "LEFT"   }, 180 },
+            { { 1,  0, "UP"     }, -90 },
+            { { 1,  0, "DOWN"   },  90 },
+            { {-1,  0, "RIGHT"  }, 180 },
+            { {-1,  0, "LEFT"   },   0 },
+            { {-1,  0, "UP"     },  90 },
+            { {-1,  0, "DOWN"   }, -90 },
+        };
 
         static QPen getBodyPen() {
             return QPen(Qt::black, L2P(bodyThick), Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin);
@@ -43,6 +58,43 @@ namespace gui_qt {
             return m_margin;
         }
 
+        void addTerminal(const std::string& name, const QPointF& logPoint) {
+            m_logTerminals.emplace(name, logPoint);
+        }
+
+        qreal getRotationAngle(const std::string& recomm, const QPointF& termLogPos) const {
+            auto center = P2L(boundingRect().center());
+            auto refVec = termLogPos - center;
+            auto signum = [](auto val) -> int { return (decltype(val)(0) < val) - (val < decltype(val)(0)); };
+
+            auto key = std::make_tuple(signum(refVec.x()), signum(refVec.y()), recomm);
+            auto it = rotationMap.find(key);
+            if(it != rotationMap.end()) {
+                return it->second;
+            }
+
+            throw std::runtime_error(std::string("GUI angle key '<") +
+                    std::to_string(std::get<0>(key)) + ", " +
+                    std::to_string(std::get<1>(key)) + ", " +
+                    std::get<2>(key) +
+                    ">' not found!");
+        }
+
+        void setComponentPos(const std::string& recomm, const std::string& refTermName, const QPointF& refTermLogPos) {
+            auto it = m_logTerminals.find(refTermName);
+            if(it != m_logTerminals.end()) {
+                auto itemPos = refTermLogPos - it->second;
+                auto angle = getRotationAngle(recomm, it->second);
+                setTransformOriginPoint(L2P(it->second));
+                setPos(L2P(itemPos));
+                setRotation(angle);
+            } else {
+                throw std::runtime_error(std::string("GUI component terminal '") +
+                        refTermName +
+                        "' not found!");
+            }
+        }
+
         static QPen getDrawingPen_T1() {
             return getTerminalPen();
         }
@@ -53,24 +105,13 @@ namespace gui_qt {
             termThick = thTerm;
         }
 
-        SchComponent(qreal logX, qreal logY, qreal logLength, qreal logWidth, qreal logMargin)
+        SchComponent(qreal logLength, qreal logWidth, qreal logMargin)
             : m_length(L2P(logLength)),
             m_width(L2P(logWidth)),
             m_margin(L2P(logMargin)) {
-
-            setPos(L2P(logX), L2P(logY));
         }
 
-        SchComponent(QPointF logPointA, QPointF logPointB, qreal logMargin)
-            : SchComponent(logPointA.x(),
-                    logPointA.y(),
-                    std::abs((logPointB - logPointA).x()),
-                    std::abs((logPointB - logPointA).y()),
-                    logMargin) {
-        }
-
-        virtual ~SchComponent() {
-        }
+        virtual ~SchComponent() = default;
 
         virtual QRectF boundingRect() const override {
             return QRectF(0, 0, m_length, m_width);
@@ -84,23 +125,6 @@ namespace gui_qt {
 
             painter->setPen(getTerminalPen());
             drawTerminals(painter);
-        }
-
-    };
-
-    class SchConnLine : public SchComponent {
-
-        public:
-        SchConnLine(QPointF logPointA, QPointF logPointB)
-            : SchComponent(logPointA, logPointB, 0) {
-        }
-
-        protected:
-        void drawBody(QPainter*) const override {
-        }
-
-        void drawTerminals(QPainter* painter) const override {
-            painter->drawLine(0, 0, getL(), getW());
         }
 
     };
@@ -122,8 +146,11 @@ namespace gui_qt {
         }
 
         public:
-        Resistor(qreal logX, qreal logY)
-            : SchComponent(logX, logY, logLength, logWidth, logMargin) {
+        Resistor(const QPointF& pos, const std::string& recomm, const std::string& refTerm)
+            : SchComponent(logLength, logWidth, logMargin) {
+            addTerminal("1", QPointF(0, logWidth / 2));
+            addTerminal("2", QPointF(logLength, logWidth / 2));
+            setComponentPos(recomm, refTerm, pos);
         }
 
     };
@@ -146,8 +173,11 @@ namespace gui_qt {
         }
 
         public:
-        Capacitor(qreal logX, qreal logY)
-            : SchComponent(logX, logY, logLength, logWidth, logMargin) {
+        Capacitor(const QPointF& pos, const std::string& recomm, const std::string& refTerm)
+            : SchComponent(logLength, logWidth, logMargin) {
+            addTerminal("1", QPointF(0, logWidth / 2));
+            addTerminal("2", QPointF(logLength, logWidth / 2));
+            setComponentPos(recomm, refTerm, pos);
         }
 
     };
@@ -183,8 +213,13 @@ namespace gui_qt {
         }
 
         public:
-        NpnTransistor(qreal logX, qreal logY)
-            : SchComponent(logX, logY, logLength, logWidth, logMargin) {
+        NpnTransistor(const QPointF& pos, const std::string& recomm, const std::string& refTerm)
+            : SchComponent(logLength, logWidth, logMargin) {
+            //1 - col, 2 - bas, 3 - emi
+            addTerminal("1", QPointF(logLength - logMargin * 3, 0));
+            addTerminal("2", QPointF(0, logWidth / 2));
+            addTerminal("3", QPointF(logLength - logMargin * 3, logWidth));
+            setComponentPos(recomm, refTerm, pos);
         }
 
     };

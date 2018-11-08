@@ -16,7 +16,7 @@ namespace gui_qt {
         m_scene->setSceneRect(0, 0, L2P(g_logSchWidth), L2P(g_logSchHeight));
         m_view->setRenderHints(QPainter::Antialiasing | QPainter::SmoothPixmapTransform);
 
-        m_view->show();
+        m_view->showMaximized();
 
         m_grid = new SchGrid();
         m_grid->enableGrid(true);
@@ -37,30 +37,14 @@ namespace gui_qt {
         //Temporary test
         m_view->fitInView(200, 0, 700, 250, Qt::KeepAspectRatio);
 
-        SchComponent* res = new Resistor(30, 10);
+        SchComponent* res = new Resistor(QPointF(10, 9), "DOWN", "2");
         m_scene->addItem(res);
 
-        SchComponent* cap = new Capacitor(42, 10);
+        SchComponent* cap = new Capacitor(QPointF(30, 10), "LEFT", "1");
         m_scene->addItem(cap);
 
-        SchComponent* tran = new NpnTransistor(50, 8);
+        SchComponent* tran = new NpnTransistor(QPointF(50, 8), "UP", "2");
         m_scene->addItem(tran);
-
-        //ctmp - temporary test
-        auto resRect = res->boundingRect();
-        auto capRect = cap->boundingRect();
-
-        QPointF beg(res->x() + resRect.width(),
-                res->y() + resRect.height() / 2);
-        QPointF end(cap->x(),
-                cap->y() + capRect.height() / 2);
-        //
-        auto* line1 = new SchConnLine(P2L(beg), P2L(end));
-        auto* line2 = new SchConnLine(QPointF(2, 2), QPointF(5, 2));
-        auto* line3 = new SchConnLine(QPointF(2, 2), QPointF(2, 5));
-        m_scene->addItem(line1);
-        m_scene->addItem(line2);
-        m_scene->addItem(line3);
     }
 
     void Schematic::setThickness(int key) const {

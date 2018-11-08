@@ -11,7 +11,7 @@ LOGMODE = -D_VERBOSE
 
 INCLUDEPATH += .
 INCLUDEPATH += ./file_io ./parser ./circuit ./task ./gui ./gui_qt
-QMAKE_CXXFLAGS += -Wextra -pedantic -std=c++14 $$LOGMODE
+QMAKE_CXXFLAGS += -Wextra -pedantic -std=c++17 $$LOGMODE
 
 # Input
 HEADERS += gui_qt/schematic.h \
