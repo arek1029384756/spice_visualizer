@@ -36,8 +36,7 @@ namespace gui {
             : m_progress(new gui_qt::Progress(this)) {
         }
 
-        virtual ~GuiProgressQt() {
-        }
+        virtual ~GuiProgressQt() = default;
 
 
         //External synchronized interface

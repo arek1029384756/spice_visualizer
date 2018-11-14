@@ -22,7 +22,7 @@ namespace task {
 
     template<class... TArgs>
     class BaseThread : public ThreadManagerInterface<TArgs...>,
-                              ThreadUserInterface {
+                       public ThreadUserInterface {
         std::atomic<bool> m_run;
         std::thread m_th;
 

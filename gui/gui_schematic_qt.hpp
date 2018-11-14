@@ -19,8 +19,7 @@ namespace gui {
             : m_schematic(new gui_qt::Schematic(this)) {
         }
 
-        virtual ~GuiSchematicQt() {
-        }
+        virtual ~GuiSchematicQt() = default;
 
         //External synchronized interface
 

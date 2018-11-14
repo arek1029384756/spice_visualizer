@@ -1,5 +1,5 @@
-#ifndef SCHCOMPONENT_H
-#define SCHCOMPONENT_H
+#ifndef SCH_COMPONENT
+#define SCH_COMPONENT
 
 #include <QGraphicsItem>
 #include <tuple>

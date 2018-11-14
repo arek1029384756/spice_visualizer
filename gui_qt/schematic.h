@@ -1,5 +1,5 @@
-#ifndef SCHEMATIC_H
-#define SCHEMATIC_H
+#ifndef SCHEMATIC
+#define SCHEMATIC
 
 #include <QDialog>
 #include <QGraphicsScene>
@@ -10,8 +10,7 @@
 
 namespace gui_qt {
 
-    class Schematic : public QDialog
-    {
+    class Schematic : public QDialog {
         Q_OBJECT
 
         public slots:

@@ -1,5 +1,5 @@
-#ifndef PROGRESS_H
-#define PROGRESS_H
+#ifndef PROGRESS
+#define PROGRESS
 
 #include <QDialog>
 #include <QFormLayout>

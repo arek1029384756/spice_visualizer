@@ -1,5 +1,5 @@
-#ifndef GRAPHICSCOMPONENT_H
-#define GRAPHICSCOMPONENT_H
+#ifndef GRAPHICS_COMPONENT
+#define GRAPHICS_COMPONENT
 
 #include <QGraphicsItem>
 #include <sch_params.hpp>
