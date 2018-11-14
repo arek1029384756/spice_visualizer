@@ -4,7 +4,7 @@
 #include <QDialog>
 #include <QGraphicsScene>
 #include <QGraphicsView>
-#include <sch_component.hpp>
+#include <schematic_component.hpp>
 #include <graphics_component.hpp>
 #include <gui_schematic_interface.hpp>
 

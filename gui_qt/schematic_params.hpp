@@ -1,5 +1,5 @@
-#ifndef SCH_PARAMS
-#define SCH_PARAMS
+#ifndef SCHEMATIC_PARAMS
+#define SCHEMATIC_PARAMS
 
 namespace gui_qt {
 

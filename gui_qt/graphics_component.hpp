@@ -2,7 +2,7 @@
 #define GRAPHICS_COMPONENT
 
 #include <QGraphicsItem>
-#include <sch_params.hpp>
+#include <schematic_params.hpp>
 
 namespace gui_qt {
 

@@ -1,10 +1,10 @@
-#ifndef SCH_COMPONENT
-#define SCH_COMPONENT
+#ifndef SCHEMATIC_COMPONENT
+#define SCHEMATIC_COMPONENT
 
 #include <QGraphicsItem>
 #include <tuple>
 #include <map>
-#include <sch_params.hpp>
+#include <schematic_params.hpp>
 
 namespace gui_qt {
 
@@ -215,7 +215,7 @@ namespace gui_qt {
         public:
         NpnTransistor(const QPointF& pos, const std::string& recomm, const std::string& refTerm)
             : SchComponent(logLength, logWidth, logMargin) {
-            //1 - col, 2 - bas, 3 - emi
+            //1 - col, 2 - bas, 3 - emi (NGSPICE documentation)
             addTerminal("1", QPointF(logLength - logMargin * 3, 0));
             addTerminal("2", QPointF(0, logWidth / 2));
             addTerminal("3", QPointF(logLength - logMargin * 3, logWidth));
