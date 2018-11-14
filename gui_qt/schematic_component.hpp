@@ -18,7 +18,18 @@ namespace gui_qt {
         qreal m_width;
         qreal m_margin;
 
+        std::string m_name;
+        std::string m_value;
+
         std::map<std::string, QPointF> m_logTerminals;
+
+        void drawInfo(QPainter* painter) const {
+            painter->setFont(QFont("Courier New", 8, QFont::Normal));
+            auto rlt = QPointF(0, getW());
+            auto rsize = QSizeF(getL(), getM());
+            painter->drawText(QRectF(rlt, rsize), Qt::AlignCenter, QString(m_name.c_str()));
+            painter->drawText(QRectF(rlt + QPointF(0, getM()), rsize), Qt::AlignCenter, QString(m_value.c_str()));
+        }
 
         static qreal bodyThick;
         static qreal termThick;
@@ -105,10 +116,16 @@ namespace gui_qt {
             termThick = thTerm;
         }
 
-        SchComponent(qreal logLength, qreal logWidth, qreal logMargin)
+        SchComponent(qreal logLength,
+                    qreal logWidth,
+                    qreal logMargin,
+                    const std::string& name,
+                    const std::string& value)
             : m_length(L2P(logLength)),
             m_width(L2P(logWidth)),
-            m_margin(L2P(logMargin)) {
+            m_margin(L2P(logMargin)),
+            m_name(name),
+            m_value(value) {
         }
 
         virtual ~SchComponent() = default;
@@ -125,6 +142,9 @@ namespace gui_qt {
 
             painter->setPen(getTerminalPen());
             drawTerminals(painter);
+
+            painter->setPen(Qt::black);
+            drawInfo(painter);
         }
 
     };
@@ -146,8 +166,12 @@ namespace gui_qt {
         }
 
         public:
-        Resistor(const QPointF& pos, const std::string& recomm, const std::string& refTerm)
-            : SchComponent(logLength, logWidth, logMargin) {
+        Resistor(const QPointF& pos,
+                const std::string& recomm,
+                const std::string& refTerm,
+                const std::string& name,
+                const std::string& value)
+            : SchComponent(logLength, logWidth, logMargin, name, value) {
             addTerminal("1", QPointF(0, logWidth / 2));
             addTerminal("2", QPointF(logLength, logWidth / 2));
             setComponentPos(recomm, refTerm, pos);
@@ -173,8 +197,12 @@ namespace gui_qt {
         }
 
         public:
-        Capacitor(const QPointF& pos, const std::string& recomm, const std::string& refTerm)
-            : SchComponent(logLength, logWidth, logMargin) {
+        Capacitor(const QPointF& pos,
+                const std::string& recomm,
+                const std::string& refTerm,
+                const std::string& name,
+                const std::string& value)
+            : SchComponent(logLength, logWidth, logMargin, name, value) {
             addTerminal("1", QPointF(0, logWidth / 2));
             addTerminal("2", QPointF(logLength, logWidth / 2));
             setComponentPos(recomm, refTerm, pos);
@@ -213,8 +241,12 @@ namespace gui_qt {
         }
 
         public:
-        NpnTransistor(const QPointF& pos, const std::string& recomm, const std::string& refTerm)
-            : SchComponent(logLength, logWidth, logMargin) {
+        NpnTransistor(const QPointF& pos,
+                const std::string& recomm,
+                const std::string& refTerm,
+                const std::string& name,
+                const std::string& value)
+            : SchComponent(logLength, logWidth, logMargin, name, value) {
             //1 - col, 2 - bas, 3 - emi (NGSPICE documentation)
             addTerminal("1", QPointF(logLength - logMargin * 3, 0));
             addTerminal("2", QPointF(0, logWidth / 2));

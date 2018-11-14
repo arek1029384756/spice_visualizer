@@ -37,13 +37,13 @@ namespace gui_qt {
         //Temporary test
         m_view->fitInView(200, 0, 700, 250, Qt::KeepAspectRatio);
 
-        SchComponent* res = new Resistor(QPointF(10, 9), "DOWN", "2");
+        SchComponent* res = new Resistor(QPointF(10, 9), "DOWN", "2", "R15", "10k");
         m_scene->addItem(res);
 
-        SchComponent* cap = new Capacitor(QPointF(30, 10), "LEFT", "1");
+        SchComponent* cap = new Capacitor(QPointF(30, 10), "LEFT", "1", "C123", "100n");
         m_scene->addItem(cap);
 
-        SchComponent* tran = new NpnTransistor(QPointF(50, 8), "UP", "2");
+        SchComponent* tran = new NpnTransistor(QPointF(50, 8), "UP", "2", "Q2", "BC548B");
         m_scene->addItem(tran);
     }
 
