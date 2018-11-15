@@ -182,13 +182,13 @@ namespace gui_qt {
     class Capacitor : public SchComponent {
 
         static constexpr qreal logLength = 4;
-        static constexpr qreal logWidth = 4;
+        static constexpr qreal logWidth = 6;
         static constexpr qreal logMargin = 1;
 
         protected:
         void drawBody(QPainter* painter) const override {
-            painter->drawLine(getL() / 2 - getM() / 2, 0, getL() / 2 - getM() / 2, getW());
-            painter->drawLine(getL() / 2 + getM() / 2, 0, getL() / 2 + getM() / 2, getW());
+            painter->drawLine(getL() / 2 - getM() / 2, getM(), getL() / 2 - getM() / 2, getW() - getM());
+            painter->drawLine(getL() / 2 + getM() / 2, getM(), getL() / 2 + getM() / 2, getW() - getM());
         }
 
         void drawTerminals(QPainter* painter) const override {
