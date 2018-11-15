@@ -24,11 +24,22 @@ namespace gui_qt {
         std::map<std::string, QPointF> m_logTerminals;
 
         void drawInfo(QPainter* painter) const {
+            auto angle = rotation();
+            auto vertical = std::abs(static_cast<std::int64_t>(angle)) % 180;
+            auto align = (vertical) ? Qt::AlignVCenter | Qt::AlignLeft
+                                    : Qt::AlignTop | Qt::AlignHCenter;
+            auto offset = (vertical) ? QPointF((getL() + getW() - getM()) / 2, 0)
+                                     : QPointF(0, getW() - getM() / 2);
+            auto str = QString(m_name.c_str()) + QString("\n") + QString(m_value.c_str());
+
+            painter->save();
+            painter->translate(boundingRect().center());
+            painter->rotate(-angle);
+            painter->translate(-boundingRect().center());
+            painter->translate(offset);
             painter->setFont(QFont("Courier New", 8, QFont::Normal));
-            auto rlt = QPointF(0, getW());
-            auto rsize = QSizeF(getL(), getM());
-            painter->drawText(QRectF(rlt, rsize), Qt::AlignCenter, QString(m_name.c_str()));
-            painter->drawText(QRectF(rlt + QPointF(0, getM()), rsize), Qt::AlignCenter, QString(m_value.c_str()));
+            painter->drawText(boundingRect(), align, str);
+            painter->restore();
         }
 
         static qreal bodyThick;
