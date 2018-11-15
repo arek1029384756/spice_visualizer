@@ -11,10 +11,12 @@ namespace gui_qt {
         : QDialog(parent), m_ifc(ifc) {
 
         m_scene = new QGraphicsScene();
-        m_view = new QGraphicsView(m_scene);
+        m_view = new GraphicsView(m_scene);
 
         m_scene->setSceneRect(0, 0, L2P(g_logSchWidth), L2P(g_logSchHeight));
         m_view->setRenderHints(QPainter::Antialiasing | QPainter::SmoothPixmapTransform);
+        m_view->setDragMode(QGraphicsView::ScrollHandDrag);
+        m_view->setTransformationAnchor(QGraphicsView::AnchorUnderMouse);
 
         m_view->showMaximized();
 
@@ -47,6 +49,10 @@ namespace gui_qt {
         m_scene->addItem(tran);
     }
 
+    void Schematic::toggleGrid(int /* key */) const {
+        m_grid->toggleGrid();
+    }
+
     void Schematic::setThickness(int key) const {
         if(key == Qt::Key_1) {
             SchComponent::setThickness(0.3, 0.1);
@@ -58,12 +64,39 @@ namespace gui_qt {
         m_scene->update();
     }
 
+    void Schematic::zoomSchematic(int key) const {
+        if(key == Qt::Key_PageUp) {
+            m_view->scale(g_scaleUp, g_scaleUp);
+        } else if(key == Qt::Key_PageDown) {
+            m_view->scale(g_scaleDown, g_scaleDown);
+        }
+    }
+
+    void Schematic::scrollSchematic(int key) const {
+        constexpr int delta = 20;
+        auto valH = m_view->horizontalScrollBar()->value();
+        auto valV = m_view->verticalScrollBar()->value();
+
+        if(key == Qt::Key_Left) {
+            valH -= delta;
+        } else if(key == Qt::Key_Right) {
+            valH += delta;
+        } else if(key == Qt::Key_Up) {
+            valV -= delta;
+        } else if(key == Qt::Key_Down) {
+            valV += delta;
+        }
+
+        m_view->horizontalScrollBar()->setValue(valH);
+        m_view->verticalScrollBar()->setValue(valV);
+    }
+
     void Schematic::keyPressEvent(QKeyEvent* e) {
         const auto key = e->key();
-        if(key == Qt::Key_G) {
-            m_grid->toggleGrid();
-        } else {
-            setThickness(key);
+        auto it = m_keyCommands.find(key);
+        if(it != m_keyCommands.end()) {
+            auto fun = std::bind(it->second, this, key);
+            fun();
         }
 
         QDialog::keyPressEvent(e);
