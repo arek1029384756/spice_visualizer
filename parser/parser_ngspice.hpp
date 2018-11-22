@@ -96,6 +96,8 @@ namespace parsers {
             : m_ignore(false), m_circuit(circuit) {
         }
 
+        virtual ~ParserNGSPICE() = default;
+
         virtual void parseLine(const std::string& line) override {
             try {
                 std::cout << "Line:" << line << std::endl;

@@ -22,6 +22,8 @@ namespace circuit {
             : m_name(name), m_referenceTerminal("") {
         }
 
+        virtual ~Recommendation() = default;
+
         bool operator==(const Recommendation& other) const {
             return m_name == other.getName();
         }
@@ -78,6 +80,8 @@ namespace circuit {
         Connection(const std::string& name)
             : m_name(name) {}
 
+        virtual ~Connection() = default;
+
         void attachComponent(const std::string& name) {
             m_components.emplace_back(name);
         }
@@ -129,6 +133,8 @@ namespace circuit {
                 m_terminals.emplace_back(terminal);
             }
         }
+
+        virtual ~Component() = default;
 
         const std::string& getType() const {
             return m_type;
@@ -293,6 +299,8 @@ namespace circuit {
         CircuitGraph(TSchematicInterface * const schIfc, TProgressInterface * const progressIfc)
             : m_schIfc(schIfc), m_progressIfc(progressIfc) {
         }
+
+        virtual ~CircuitGraph() = default;
 
         template<typename T = std::string>
         void setTerminals(const std::initializer_list<T> initL) {

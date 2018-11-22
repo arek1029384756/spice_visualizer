@@ -16,6 +16,7 @@ QMAKE_CXXFLAGS += -Wextra -pedantic -std=c++17 $$LOGMODE
 # Input
 HEADERS += gui_qt/schematic.h \
 gui_qt/schematic_params.hpp \
+gui_qt/schematic_component_base.hpp \
 gui_qt/schematic_component.hpp \
 gui_qt/graphics_component.hpp \
 gui_qt/progress.h \

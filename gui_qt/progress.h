@@ -33,6 +33,7 @@ namespace gui_qt {
 
         public:
         Progress(gui::GuiProgressInterfaceInt* ifc, QDialog* parent = 0);
+        virtual ~Progress() = default;
     };
 }
 

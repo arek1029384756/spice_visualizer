@@ -39,6 +39,8 @@ namespace file_reader {
             : m_parser(parser), m_progressIfc(progressIfc)  {
         }
 
+        virtual ~FileReader() = default;
+
         void readFile(const std::string& filename) {
             std::ifstream ifs(filename);
             if(ifs.is_open()) {

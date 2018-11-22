@@ -57,6 +57,9 @@ namespace circuit {
  
         }
 
+        public:
+        virtual ~Processor() = default;
+
     };
 
 }

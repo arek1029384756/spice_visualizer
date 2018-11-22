@@ -17,8 +17,7 @@ namespace {
         App(int argc, char** argv, QApplication* const qtApp)
             : m_argc(argc), m_argv(argv), m_qtApp(qtApp) {}
 
-        virtual ~App() {
-        }
+        virtual ~App() = default;
 
         static const std::string& getVersion() {
             static const std::string ver = "1.0";

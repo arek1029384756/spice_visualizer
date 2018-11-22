@@ -19,6 +19,8 @@ namespace gui_qt {
             setPos(0, 0);
         }
 
+        virtual ~SchGrid() = default;
+
         virtual QRectF boundingRect() const override {
             return QRectF(0, 0, L2P(g_logSchWidth), L2P(g_logSchHeight));
         }

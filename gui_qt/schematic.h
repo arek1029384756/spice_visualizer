@@ -37,8 +37,8 @@ namespace gui_qt {
 
         public:
             Schematic(gui::GuiSchematicInterfaceInt* ifc, QWidget *parent = 0);
+            void keyPressEvent(QKeyEvent* e) override;
             virtual ~Schematic();
-            void keyPressEvent(QKeyEvent* e);
 
         private:
             QGraphicsScene* m_scene;
