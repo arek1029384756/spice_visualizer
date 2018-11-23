@@ -4,6 +4,7 @@
 #include <QGraphicsItem>
 #include <tuple>
 #include <map>
+#include <cmath>
 #include <schematic_params.hpp>
 
 namespace gui_qt {
@@ -21,7 +22,8 @@ namespace gui_qt {
         std::string m_name;
         std::string m_value;
 
-        std::map<std::string, QPointF> m_logTerminals;
+        std::map<std::string, QPointF> m_termToLogItemPos;
+        std::map<std::string, std::string> m_connToTerm;
 
         void drawInfo(QPainter* painter) const {
             auto angle = rotation();
@@ -42,18 +44,80 @@ namespace gui_qt {
             painter->restore();
         }
 
+        qreal getRotationAngle(const std::string& recomm, const QPointF& refTermLogItemPos) const {
+            auto center = P2L(boundingRect().center());
+            auto refVec = refTermLogItemPos - center;
+            auto signum = [](auto val) -> int { return (decltype(val)(0) < val) - (val < decltype(val)(0)); };
+
+            auto key = std::make_tuple(signum(refVec.x()), signum(refVec.y()), recomm);
+            auto it = rotationMap.find(key);
+            if(it != rotationMap.end()) {
+                return it->second;
+            }
+
+            throw std::runtime_error(std::string("GUI: angle key '<") +
+                    std::to_string(std::get<0>(key)) + ", " +
+                    std::to_string(std::get<1>(key)) + ", " +
+                    std::get<2>(key) +
+                    ">' for component '" +
+                    m_name +
+                    "' not found!");
+        }
+
+        void setComponentOrientation(const std::string& recomm, const std::string& refTermName) {
+            auto termPos = getTermLogItemPos(refTermName);
+            auto angle = getRotationAngle(recomm, termPos);
+            setRotation(angle);
+        }
+
+        const std::string& getTermFromConn(const std::string& connection) const {
+            auto it = m_connToTerm.find(connection);
+            if(it != m_connToTerm.end()) {
+                return it->second;
+            }
+
+            throw std::runtime_error(std::string("GUI: connection '") +
+                    connection +
+                    + "' for component '" +
+                    m_name +
+                    "' not found!");
+        }
+
+        const QPointF getTermLogItemPos(const std::string& term) const {
+            auto it = m_termToLogItemPos.find(term);
+            if(it != m_termToLogItemPos.end()) {
+                return it->second;
+            }
+
+            throw std::runtime_error(std::string("GUI: terminal '") +
+                    term +
+                    + "' for component '" +
+                    m_name +
+                    "' not found!");
+        }
+
+        const QPointF getTermLogScenePos(const std::string& term) const {
+            auto termPos = getTermLogItemPos(term);
+            auto angle = rotation();
+            return P2L(scenePos()) + rotateVector(termPos, angle);
+        }
+
         static qreal bodyThick;
         static qreal termThick;
 
+        inline static const auto rotateVector = [](auto vector, auto angle) {
+            constexpr qreal pi = std::acos(-1);
+            auto nangle = pi * angle / qreal(180);
+            return decltype(vector)(std::round(vector.x() * std::cos(nangle) - vector.y() * std::sin(nangle)),
+                                    std::round(vector.x() * std::sin(nangle) + vector.y() * std::cos(nangle)));
+        };
+
         inline static const std::map<std::tuple<int, int, std::string>, qreal> rotationMap = {
-            { { 1,  0, "RIGHT"  },   0 },
-            { { 1,  0, "LEFT"   }, 180 },
-            { { 1,  0, "UP"     }, -90 },
-            { { 1,  0, "DOWN"   },  90 },
-            { {-1,  0, "RIGHT"  }, 180 },
-            { {-1,  0, "LEFT"   },   0 },
-            { {-1,  0, "UP"     },  90 },
-            { {-1,  0, "DOWN"   }, -90 },
+            { { 1,  0, "RIGHT" },   0 }, { { 1,  0, "LEFT"  }, 180 }, { { 1,  0, "UP"    }, -90 }, { { 1,  0, "DOWN"  },  90 },
+            { {-1,  0, "RIGHT" }, 180 }, { {-1,  0, "LEFT"  },   0 }, { {-1,  0, "UP"    },  90 }, { {-1,  0, "DOWN"  }, -90 },
+            { { 1, -1, "RIGHT" },  90 }, { { 1, -1, "LEFT"  }, -90 }, { { 1, -1, "UP"    },   0 }, { { 1, -1, "DOWN"  }, 180 },
+            { { 1,  1, "RIGHT" }, -90 }, { { 1,  1, "LEFT"  },  90 }, { { 1,  1, "UP"    }, 180 }, { { 1,  1, "DOWN"  },   0 },
+            { {-1,  1, "RIGHT" }, 180 }, { {-1,  1, "LEFT"  },   0 }, { {-1,  1, "UP"    },  90 }, { {-1,  1, "DOWN"  }, -90 },
         };
 
         static QPen getBodyPen() {
@@ -80,43 +144,6 @@ namespace gui_qt {
             return m_margin;
         }
 
-        void addTerminal(const std::string& name, const QPointF& logPoint) {
-            m_logTerminals.emplace(name, logPoint);
-        }
-
-        qreal getRotationAngle(const std::string& recomm, const QPointF& refTermLogItemPos) const {
-            auto center = P2L(boundingRect().center());
-            auto refVec = refTermLogItemPos - center;
-            auto signum = [](auto val) -> int { return (decltype(val)(0) < val) - (val < decltype(val)(0)); };
-
-            auto key = std::make_tuple(signum(refVec.x()), signum(refVec.y()), recomm);
-            auto it = rotationMap.find(key);
-            if(it != rotationMap.end()) {
-                return it->second;
-            }
-
-            throw std::runtime_error(std::string("GUI angle key '<") +
-                    std::to_string(std::get<0>(key)) + ", " +
-                    std::to_string(std::get<1>(key)) + ", " +
-                    std::get<2>(key) +
-                    ">' not found!");
-        }
-
-        void setComponentPos(const std::string& recomm, const std::string& refTermName, const QPointF& refTermLogScenePos) {
-            auto it = m_logTerminals.find(refTermName);
-            if(it != m_logTerminals.end()) {
-                auto itemPos = refTermLogScenePos - it->second;
-                auto angle = getRotationAngle(recomm, it->second);
-                setTransformOriginPoint(L2P(it->second));
-                setPos(L2P(itemPos));
-                setRotation(angle);
-            } else {
-                throw std::runtime_error(std::string("GUI component terminal '") +
-                        refTermName +
-                        "' not found!");
-            }
-        }
-
         static QPen getDrawingPen_T1() {
             return getTerminalPen();
         }
@@ -130,16 +157,31 @@ namespace gui_qt {
         SchComponent(qreal logLength,
                     qreal logWidth,
                     qreal logMargin,
+                    const std::string& recomm,
+                    const std::string& refTermName,
                     const std::string& name,
-                    const std::string& value)
+                    const std::string& value,
+                    const std::map<std::string, QPointF>& termToPos,
+                    const std::map<std::string, std::string>& connToTerm)
             : m_length(L2P(logLength)),
             m_width(L2P(logWidth)),
             m_margin(L2P(logMargin)),
             m_name(name),
-            m_value(value) {
+            m_value(value),
+            m_termToLogItemPos(termToPos),
+            m_connToTerm(connToTerm) {
+
+            setComponentOrientation(recomm, refTermName);
         }
 
         virtual ~SchComponent() = default;
+
+        void setComponentPos(const std::string& terminal, const QPointF& position) {
+            auto termPos = getTermLogItemPos(terminal);
+            auto angle = rotation();
+            auto pos = position - rotateVector(termPos, angle);
+            setPos(L2P(pos));
+        }
 
         virtual QRectF boundingRect() const override {
             return QRectF(0, 0, m_length, m_width);

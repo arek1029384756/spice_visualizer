@@ -22,15 +22,26 @@ namespace gui_qt {
         }
 
         public:
-        Resistor(const QPointF& pos,
-                const std::string& recomm,
+        Resistor(const std::string& recomm,
                 const std::string& refTerm,
                 const std::string& name,
                 const std::string& value)
-            : SchComponent(logLength, logWidth, logMargin, name, value) {
-            addTerminal("1", QPointF(0, logWidth / 2));
-            addTerminal("2", QPointF(logLength, logWidth / 2));
-            setComponentPos(recomm, refTerm, pos);
+            : SchComponent(logLength,
+                    logWidth,
+                    logMargin,
+                    recomm,
+                    refTerm,
+                    name,
+                    value,
+                    {
+                        { "1", QPointF(0, logWidth / 2) },
+                        { "2", QPointF(logLength, logWidth / 2) }
+                    },
+                    {
+                        //tmp - this would be taken from graph traversal
+                        { "net1", "1" },
+                        { "net2", "2" }
+                    }) {
         }
 
         virtual ~Resistor() = default;
@@ -55,15 +66,26 @@ namespace gui_qt {
         }
 
         public:
-        Capacitor(const QPointF& pos,
-                const std::string& recomm,
+        Capacitor(const std::string& recomm,
                 const std::string& refTerm,
                 const std::string& name,
                 const std::string& value)
-            : SchComponent(logLength, logWidth, logMargin, name, value) {
-            addTerminal("1", QPointF(0, logWidth / 2));
-            addTerminal("2", QPointF(logLength, logWidth / 2));
-            setComponentPos(recomm, refTerm, pos);
+            : SchComponent(logLength,
+                    logWidth,
+                    logMargin,
+                    recomm,
+                    refTerm,
+                    name,
+                    value,
+                    {
+                        { "1", QPointF(0, logWidth / 2) },
+                        { "2", QPointF(logLength, logWidth / 2) }
+                    },
+                    {
+                        //tmp - this would be taken from graph traversal
+                        { "net1", "1" },
+                        { "net2", "2" }
+                    }) {
         }
 
         virtual ~Capacitor() = default;
@@ -100,17 +122,29 @@ namespace gui_qt {
         }
 
         public:
-        NpnTransistor(const QPointF& pos,
-                const std::string& recomm,
+        NpnTransistor(const std::string& recomm,
                 const std::string& refTerm,
                 const std::string& name,
                 const std::string& value)
-            : SchComponent(logLength, logWidth, logMargin, name, value) {
-            //1 - col, 2 - bas, 3 - emi (NGSPICE documentation)
-            addTerminal("1", QPointF(logLength - logMargin * 3, 0));
-            addTerminal("2", QPointF(0, logWidth / 2));
-            addTerminal("3", QPointF(logLength - logMargin * 3, logWidth));
-            setComponentPos(recomm, refTerm, pos);
+            : SchComponent(logLength,
+                    logWidth,
+                    logMargin,
+                    recomm,
+                    refTerm,
+                    name,
+                    value,
+                    {
+                        //1 - col, 2 - bas, 3 - emi (NGSPICE documentation)
+                        { "1", QPointF(logLength - logMargin * 3, 0) },
+                        { "2", QPointF(0, logWidth / 2) },
+                        { "3", QPointF(logLength - logMargin * 3, logWidth) }
+                    },
+                    {
+                        //tmp - this would be taken from graph traversal
+                        { "net1", "1" },
+                        { "net2", "2" },
+                        { "net3", "3" }
+                    }) {
         }
 
         virtual ~NpnTransistor() = default;
