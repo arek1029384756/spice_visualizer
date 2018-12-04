@@ -19,7 +19,8 @@ namespace gui_qt {
         qreal m_width;
         qreal m_margin;
 
-        QRectF m_boundingRect;
+        QFont m_font;
+        qreal m_metrics;
 
         std::string m_name;
         std::string m_value;
@@ -33,7 +34,7 @@ namespace gui_qt {
 
         void drawInfo(QPainter* painter) const {
             auto angle = rotation();
-            auto vertical = std::abs(static_cast<std::int64_t>(angle)) % 180;
+            auto vertical = std::abs(angle) == qreal(90);
             auto align = (vertical) ? Qt::AlignVCenter | Qt::AlignLeft
                                     : Qt::AlignTop | Qt::AlignHCenter;
             auto offset = (vertical) ? QPointF((getL() + getW() - getM()) / 2, 0)
@@ -45,7 +46,7 @@ namespace gui_qt {
             painter->rotate(-angle);
             painter->translate(-getComponentRect().center());
             painter->translate(offset);
-            painter->setFont(QFont("Courier New", 8, QFont::Normal));
+            painter->setFont(m_font);
             painter->drawText(getComponentRect(), align, str);
             painter->restore();
         }
@@ -74,6 +75,14 @@ namespace gui_qt {
             auto termPos = getTermLogItemPos(refTermName);
             auto angle = getRotationAngle(recomm, termPos);
             setRotation(angle);
+        }
+
+        void setComponentFont() {
+            auto vertical = std::abs(rotation()) == qreal(90);
+            m_font = QFont("Courier New", 8, QFont::Normal);
+            QFontMetrics fm(m_font);
+            m_metrics = (vertical) ? std::max(fm.width(m_name.c_str()), fm.width(m_value.c_str()))
+                                   : fm.height() * 2;
         }
 
         const std::string& getTermFromConn(const std::string& connection) const {
@@ -172,13 +181,13 @@ namespace gui_qt {
             : m_length(L2P(logLength)),
             m_width(L2P(logWidth)),
             m_margin(L2P(logMargin)),
-            m_boundingRect(getComponentRect()),
             m_name(name),
             m_value(value),
             m_termToLogItemPos(termToPos),
             m_connToTerm(connToTerm) {
 
             setComponentOrientation(recomm, refTermName);
+            setComponentFont();
         }
 
         virtual ~SchComponent() = default;
@@ -191,7 +200,7 @@ namespace gui_qt {
         }
 
         virtual QRectF boundingRect() const override {
-            return m_boundingRect;
+            return QRectF(0, -m_metrics, m_length, m_width + m_metrics * 2);
         }
 
         virtual void paint(QPainter *painter,
