@@ -19,11 +19,17 @@ namespace gui_qt {
         qreal m_width;
         qreal m_margin;
 
+        QRectF m_boundingRect;
+
         std::string m_name;
         std::string m_value;
 
         std::map<std::string, QPointF> m_termToLogItemPos;
         std::map<std::string, std::string> m_connToTerm;
+
+        QRectF getComponentRect() const {
+            return QRectF(0, 0, m_length, m_width);
+        }
 
         void drawInfo(QPainter* painter) const {
             auto angle = rotation();
@@ -35,17 +41,17 @@ namespace gui_qt {
             auto str = QString(m_name.c_str()) + QString("\n") + QString(m_value.c_str());
 
             painter->save();
-            painter->translate(boundingRect().center());
+            painter->translate(getComponentRect().center());
             painter->rotate(-angle);
-            painter->translate(-boundingRect().center());
+            painter->translate(-getComponentRect().center());
             painter->translate(offset);
             painter->setFont(QFont("Courier New", 8, QFont::Normal));
-            painter->drawText(boundingRect(), align, str);
+            painter->drawText(getComponentRect(), align, str);
             painter->restore();
         }
 
         qreal getRotationAngle(const std::string& recomm, const QPointF& refTermLogItemPos) const {
-            auto center = P2L(boundingRect().center());
+            auto center = P2L(getComponentRect().center());
             auto refVec = refTermLogItemPos - center;
             auto signum = [](auto val) -> int { return (decltype(val)(0) < val) - (val < decltype(val)(0)); };
 
@@ -166,6 +172,7 @@ namespace gui_qt {
             : m_length(L2P(logLength)),
             m_width(L2P(logWidth)),
             m_margin(L2P(logMargin)),
+            m_boundingRect(getComponentRect()),
             m_name(name),
             m_value(value),
             m_termToLogItemPos(termToPos),
@@ -184,7 +191,7 @@ namespace gui_qt {
         }
 
         virtual QRectF boundingRect() const override {
-            return QRectF(0, 0, m_length, m_width);
+            return m_boundingRect;
         }
 
         virtual void paint(QPainter *painter,
