@@ -8,12 +8,13 @@
 #include <functional>
 #include <map>
 #include <schematic_component.hpp>
-#include <graphics_component.hpp>
 #include <gui_schematic_interface.hpp>
 
 namespace gui_qt {
 
     class GraphicsView : public QGraphicsView {
+        bool m_gridEnable;
+
         protected:
             void wheelEvent(QWheelEvent* e) override {
                 if(e->modifiers() & Qt::ControlModifier) {
@@ -25,9 +26,31 @@ namespace gui_qt {
                 }
             }
 
+            void drawBackground(QPainter* painter, const QRectF& rect) override {
+                if(m_gridEnable) {
+                    painter->setClipRect(rect);
+                    painter->setPen(QPen(Qt::lightGray, 0));
+
+                    for(std::size_t i = 0; i <= g_logSchWidth; ++i) {
+                        painter->drawLine(L2P(i), 0, L2P(i), L2P(g_logSchHeight));
+                    }
+
+                    for(std::size_t i = 0; i <= g_logSchHeight; ++i) {
+                        painter->drawLine(0, L2P(i), L2P(g_logSchWidth), L2P(i));
+                    }
+                }
+            }
+
         public:
-            GraphicsView(QGraphicsScene* scene) : QGraphicsView(scene) {}
+            GraphicsView(QGraphicsScene* scene)
+                : QGraphicsView(scene), m_gridEnable(true) {}
             virtual ~GraphicsView() = default;
+
+            void toggleGrid() {
+                auto* const v = viewport();
+                m_gridEnable = !m_gridEnable;
+                v->update();
+            }
     };
 
     class Schematic : public QDialog {
@@ -42,19 +65,22 @@ namespace gui_qt {
 
         private:
             QGraphicsScene* m_scene;
-            QGraphicsView* m_view;
-            SchGrid* m_grid;
+            GraphicsView* m_view;
             gui::GuiSchematicInterfaceInt* m_ifc;
 
             void toggleGrid(int key) const;
             void setThickness(int key) const;
             void zoomSchematic(int key) const;
             void scrollSchematic(int key) const;
+            void showAll(int key) const;
+            void showOptimal(int key) const;
 
             void tmpGuiTest();
 
             inline static const std::map<int, std::function<void(Schematic* const, int)>> m_keyCommands = {
                 { Qt::Key_G,        &Schematic::toggleGrid },
+                { Qt::Key_A,        &Schematic::showAll },
+                { Qt::Key_O,        &Schematic::showOptimal },
                 { Qt::Key_1,        &Schematic::setThickness },
                 { Qt::Key_2,        &Schematic::setThickness },
                 { Qt::Key_3,        &Schematic::setThickness },

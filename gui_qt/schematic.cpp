@@ -20,10 +20,6 @@ namespace gui_qt {
 
         m_view->showMaximized();
 
-        m_grid = new SchGrid();
-        m_grid->enableGrid(true);
-        m_scene->addItem(m_grid);
-
         setThickness(Qt::Key_1);
         grabKeyboard();
 
@@ -37,8 +33,6 @@ namespace gui_qt {
 
     void Schematic::tmpGuiTest() {
         //Temporary test
-        m_view->fitInView(200, 0, 700, 250, Qt::KeepAspectRatio);
-
         SchComponent* res = new Resistor("LEFT", "1", "R1", "1000k");
         res->setComponentPos("2", QPointF(30, 10));
         m_scene->addItem(res);
@@ -53,7 +47,7 @@ namespace gui_qt {
     }
 
     void Schematic::toggleGrid(int /* key */) const {
-        m_grid->toggleGrid();
+        m_view->toggleGrid();
     }
 
     void Schematic::setThickness(int key) const {
@@ -92,6 +86,19 @@ namespace gui_qt {
 
         m_view->horizontalScrollBar()->setValue(valH);
         m_view->verticalScrollBar()->setValue(valV);
+    }
+
+    void Schematic::showAll(int /* key */) const {
+        m_view->fitInView(0,
+                          0,
+                          L2P(g_logSchWidth),
+                          L2P(g_logSchHeight),
+                          Qt::KeepAspectRatio);
+    }
+
+    void Schematic::showOptimal(int /* key */) const {
+        m_view->fitInView(m_scene->itemsBoundingRect(),
+                          Qt::KeepAspectRatio);
     }
 
     void Schematic::keyPressEvent(QKeyEvent* e) {

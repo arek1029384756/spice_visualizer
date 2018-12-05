@@ -18,7 +18,6 @@ HEADERS += gui_qt/schematic.h \
 gui_qt/schematic_params.hpp \
 gui_qt/schematic_component_base.hpp \
 gui_qt/schematic_component.hpp \
-gui_qt/graphics_component.hpp \
 gui_qt/progress.h \
 gui/gui_schematic_interface.hpp \
 gui/gui_schematic_qt.hpp \

@@ -2,6 +2,7 @@
 #define SCHEMATIC_COMPONENT_BASE
 
 #include <QGraphicsItem>
+#include <QStyleOptionGraphicsItem>
 #include <tuple>
 #include <map>
 #include <cmath>
@@ -186,6 +187,7 @@ namespace gui_qt {
             m_termToLogItemPos(termToPos),
             m_connToTerm(connToTerm) {
 
+            setFlag(QGraphicsItem::ItemUsesExtendedStyleOption, true);
             setComponentOrientation(recomm, refTermName);
             setComponentFont();
         }
@@ -204,8 +206,9 @@ namespace gui_qt {
         }
 
         virtual void paint(QPainter *painter,
-                    const QStyleOptionGraphicsItem *,
+                    const QStyleOptionGraphicsItem * opt,
                     QWidget *) override {
+            painter->setClipRect(opt->exposedRect);
             painter->setPen(getBodyPen());
             drawBody(painter);
 
