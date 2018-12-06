@@ -209,14 +209,26 @@ namespace gui_qt {
                     const QStyleOptionGraphicsItem * opt,
                     QWidget *) override {
             painter->setClipRect(opt->exposedRect);
+            painter->setBrush(QBrush(Qt::NoBrush));
+
+            const qreal details = opt->levelOfDetailFromTransform(painter->worldTransform());
+            if(details < 0.0625) {
+                painter->drawRect(getComponentRect());
+                return;
+            }
+
             painter->setPen(getBodyPen());
             drawBody(painter);
 
-            painter->setPen(getTerminalPen());
-            drawTerminals(painter);
+            if(details > 0.25) {
+                painter->setPen(getTerminalPen());
+                drawTerminals(painter);
+            }
 
-            painter->setPen(Qt::black);
-            drawInfo(painter);
+            if(details > 0.5) {
+                painter->setPen(Qt::black);
+                drawInfo(painter);
+            }
         }
 
     };

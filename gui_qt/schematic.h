@@ -30,12 +30,14 @@ namespace gui_qt {
                 if(m_gridEnable) {
                     painter->setClipRect(rect);
                     painter->setPen(QPen(Qt::lightGray, 0));
+                    const qreal details = transform().m11();
+                    const std::size_t delta = (details > 0.5) ? 1 : 10;
 
-                    for(std::size_t i = 0; i <= g_logSchWidth; ++i) {
+                    for(std::size_t i = 0; i <= g_logSchWidth; i += delta) {
                         painter->drawLine(L2P(i), 0, L2P(i), L2P(g_logSchHeight));
                     }
 
-                    for(std::size_t i = 0; i <= g_logSchHeight; ++i) {
+                    for(std::size_t i = 0; i <= g_logSchHeight; i += delta) {
                         painter->drawLine(0, L2P(i), L2P(g_logSchWidth), L2P(i));
                     }
                 }

@@ -17,6 +17,8 @@ namespace gui_qt {
         m_view->setRenderHints(QPainter::Antialiasing | QPainter::SmoothPixmapTransform);
         m_view->setDragMode(QGraphicsView::ScrollHandDrag);
         m_view->setTransformationAnchor(QGraphicsView::AnchorUnderMouse);
+        m_view->setOptimizationFlags(QGraphicsView::DontSavePainterState);
+        m_view->setViewportUpdateMode(QGraphicsView::SmartViewportUpdate);
 
         m_view->showMaximized();
 
