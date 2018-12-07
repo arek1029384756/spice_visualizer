@@ -5,6 +5,7 @@
 #include <QGraphicsScene>
 #include <QGraphicsView>
 #include <QWheelEvent>
+#include <qmath.h>
 #include <functional>
 #include <map>
 #include <schematic_component.hpp>
@@ -18,7 +19,8 @@ namespace gui_qt {
         protected:
             void wheelEvent(QWheelEvent* e) override {
                 if(e->modifiers() & Qt::ControlModifier) {
-                    auto factor = (e->delta() > 0) ? g_scaleUp : g_scaleDown;
+                    auto exp = (e->delta() > 0) ? g_scaleExp : -g_scaleExp;
+                    auto factor = qPow(qreal(2), exp);
                     scale(factor, factor);
                     e->accept();
                 } else {

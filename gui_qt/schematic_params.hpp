@@ -18,8 +18,7 @@ namespace gui_qt {
         return phys / g_gridRaster;
     }
 
-    constexpr qreal g_scaleUp = 1.1;
-    constexpr qreal g_scaleDown = qreal(1) / g_scaleUp;
+    constexpr qreal g_scaleExp = 0.2;
 }
 
 #endif

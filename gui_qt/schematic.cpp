@@ -64,11 +64,9 @@ namespace gui_qt {
     }
 
     void Schematic::zoomSchematic(int key) const {
-        if(key == Qt::Key_PageUp) {
-            m_view->scale(g_scaleUp, g_scaleUp);
-        } else if(key == Qt::Key_PageDown) {
-            m_view->scale(g_scaleDown, g_scaleDown);
-        }
+        auto factor = qPow(qreal(2),
+                (key == Qt::Key_PageUp) ? g_scaleExp  : -g_scaleExp);
+        m_view->scale(factor, factor);
     }
 
     void Schematic::scrollSchematic(int key) const {
